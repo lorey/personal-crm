@@ -19,6 +19,10 @@ def index(request):
     )
 
 
+def settings(request):
+    return render(request, "web/settings.html")
+
+
 def add_touchpoint(request, contact_id):
     contact = Contact.objects.get(pk=contact_id)
     Touchpoint.objects.create(when=datetime.now(tz=UTC), contact=contact)

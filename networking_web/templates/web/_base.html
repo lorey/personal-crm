@@ -12,6 +12,11 @@
   </head>
   <body>
     <div class="container">
+        <p class="small mt-3">
+            <a href="{% url 'networking_web:index' %}">home</a>
+            | <a href="{% url 'networking_web:settings' %}">settings</a>
+            | <a href="">logout</a>
+        </p>
         {% block content %}{% endblock %}
     </div>
 

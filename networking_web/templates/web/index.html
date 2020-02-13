@@ -1,4 +1,4 @@
-{% extends 'web/base.html' %}
+{% extends 'web/_base.html' %}
 
 {% block title %}Home{% endblock %}
 
@@ -14,7 +14,7 @@
                 {% for contact in contacts %}
                     <div class="row">
                         <div class="col-md-2">
-                            <a class="btn btn-primary" href="{% url 'networking_web:add-touchpoint' contact.id %}" title="Mark contact as done">
+                            <a class="btn btn-primary m-2" href="{% url 'networking_web:add-touchpoint' contact.id %}" title="Mark contact as done">
                                 <ion-icon name="checkmark-outline"></ion-icon>
                             </a>
                         </div>
