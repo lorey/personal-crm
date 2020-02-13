@@ -7,6 +7,13 @@ app_name = "networking_web"
 urlpatterns = [
     path("", views.index, name="index"),
     path(
-        "contacts/<int:contact_id>/add-touchpoint", views.add_touchpoint, name="add-touchpoint"
+        "contacts/<int:contact_id>/add-touchpoint",
+        views.add_touchpoint,
+        name="add-touchpoint",
+    ),
+    path(
+        "contacts/<int:contact_id>/change-frequency/<str:method>",
+        views.change_frequency,
+        name="change-frequency",
     ),
 ]

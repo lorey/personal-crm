@@ -4,9 +4,14 @@
 <div>
     <p>
         <strong>{{ contact.name }}</strong><br>
-        frequency: {{ contact.frequency_in_days }}<br>
-        last touchpoint: {{ contact.get_last_touchpoint }}<br>
+        frequency: {{ contact.frequency_in_days }}
+        <a href="{% url 'networking_web:change-frequency' contact.id 'increase' %}">+</a>
+        <a href="{% url 'networking_web:change-frequency' contact.id 'decrease' %}">-</a>
+        <br>
+        last touchpoint: {{ contact.get_last_touchpoint }}
+        <br>
         urgency: {{ contact.get_urgency }}
+        <br>
         <a href="{% url 'networking_web:add-touchpoint' contact.id %}">add touchpoint</a>
     </p>
 </div>
