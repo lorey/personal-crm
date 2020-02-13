@@ -1,20 +1,53 @@
-<html>
-<body>
-{% for contact in contacts %}
-<div>
-    <p>
-        <strong>{{ contact.name }}</strong><br>
-        frequency: {{ contact.frequency_in_days }}
-        <a href="{% url 'networking_web:change-frequency' contact.id 'increase' %}">+</a>
-        <a href="{% url 'networking_web:change-frequency' contact.id 'decrease' %}">-</a>
-        <br>
-        last touchpoint: {{ contact.get_last_touchpoint }}
-        <br>
-        urgency: {{ contact.get_urgency }}
-        <br>
-        <a href="{% url 'networking_web:add-touchpoint' contact.id %}">add touchpoint</a>
-    </p>
-</div>
-{% endfor %}
-</body>
-</html>
+{% extends 'web/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1 class="display-1 mt-5 mb-5">Keep in touch</h1>
+    <div class="row">
+        <div class="col-md-5">
+            <p>
+                <a href="{% url 'networking_web:index' %}">due contacts</a>
+                | <a href="{% url 'networking_web:index' %}?all=true">all</a>
+            </p>
+            <div>
+                {% for contact in contacts %}
+                    <div class="row">
+                        <div class="col-md-2">
+                            <a class="btn btn-primary" href="{% url 'networking_web:add-touchpoint' contact.id %}" title="Mark contact as done">
+                                <ion-icon name="checkmark-outline"></ion-icon>
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-5">
+                            <strong>{{ contact.name }}</strong><br>
+                            last: {{ contact.get_last_touchpoint.when|timesince }} ago<br>
+                            frequency: {{ contact.frequency_in_days }} days
+                            <a class="btn btn-light btn-sm" href="{% url 'networking_web:change-frequency' contact.id 'increase' %}">+</a>
+                            <a class="btn btn-light btn-sm" href="{% url 'networking_web:change-frequency' contact.id 'decrease' %}">-</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="alert alert-info">
+                        <strong>Social Debt Zero</strong>
+                        You've hit "Social Debt Zero", the equivalent of "Inbox Zero".
+                        Congratulations!
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-5 offset-1">
+            {% if not contacts|length_is:0 %}
+            <h1>How it works</h1>
+            <p>
+                Keep in touch lets you store contacts with a frequency to get in touch with them, e.g. 7 days to get in touch once a week.
+                If you haven't contacted the person for this timespan,
+                they will pop up above to remind you to get in touch.
+                After you've gotten in touch, mark the task as done and get reminded once the interval is over again.
+            </p>
+            <p>
+                It's that easy to keep in touch once in a while!
+            </p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
