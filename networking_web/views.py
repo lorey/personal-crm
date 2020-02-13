@@ -16,8 +16,7 @@ def index(request):
 def add_touchpoint(request, contact_id):
     contact = Contact.objects.get(pk=contact_id)
     Touchpoint.objects.create(when=datetime.now(tz=UTC), contact=contact)
-    referer = request.META.get("HTTP_REFERER")
-    return HttpResponseRedirect(referer)
+    return redirect_back(request)
 
 
 def change_frequency(request, contact_id, method):
@@ -26,5 +25,9 @@ def change_frequency(request, contact_id, method):
     # make sure frequency stays positive
     contact.frequency_in_days = max(contact.frequency_in_days + methods[method], 1)
     contact.save()
+    return redirect_back(request)
+
+
+def redirect_back(request):
     referer = request.META.get("HTTP_REFERER")
     return HttpResponseRedirect(referer)
