@@ -38,13 +38,16 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",  # required by allauth
+    # apps
+    # has to be included before allauth to make templates work
+    # otherwise base.html is set by allauth(?)
+    "networking_public",
+    "networking_base",
+    "networking_web",
     # allauth
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    # apps
-    "networking_base",
-    "networking_web",
 ]
 
 MIDDLEWARE = [
@@ -125,3 +128,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 SITE_ID = 1
+
+# set redirect after successful login
+LOGIN_REDIRECT_URL = "networking_web:index"
