@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from django.contrib.auth.models import User
 from django.db import models
 from pytz import UTC
 
@@ -8,6 +9,7 @@ class Contact(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField()
     frequency_in_days = models.IntegerField()
+    user = models.ForeignKey(User, models.CASCADE)
 
     # contact details
     linkedin_url = models.CharField(max_length=100, null=True, blank=True)
@@ -15,9 +17,7 @@ class Contact(models.Model):
     phone_number = models.TextField(max_length=50, null=True, blank=True)
 
     def get_last_touchpoint(self):
-        sorted_by_last = sorted(
-            self.touchpoint_set.all(), key=lambda t: t.when, reverse=True
-        )
+        sorted_by_last = sorted(self.touchpoint_set.all(), key=lambda t: t.when, reverse=True)
         return next(iter(sorted_by_last), None)
 
     def get_urgency(self):
