@@ -10,12 +10,18 @@ from networking_base.models import Contact, Touchpoint
 def index(request):
     contacts = Contact.objects.order_by("name").prefetch_related("touchpoint_set").all()
 
+    query = request.GET.get("search")
+    if query:
+        contacts = filter(lambda c: query.lower() in c.name.lower(), contacts)
+
     is_show_all = request.GET.get("all") == "true"
     if not is_show_all:
         contacts_urgent = (c for c in contacts if c.get_urgency() > 0)
         contacts = sorted(contacts_urgent, key=lambda c: c.get_urgency())
     return render(
-        request, "web/index.html", {"contacts": contacts, "is_show_all": is_show_all}
+        request,
+        "web/index.html",
+        {"contacts": list(contacts), "is_show_all": is_show_all, "query": query},
     )
 
 
