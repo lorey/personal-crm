@@ -18,12 +18,28 @@
   </head>
   <body>
     <div class="container">
-        <p class="small mt-3">
-            <a href="{% url 'index' %}">back to home</a>
-            | <a href="{% url 'networking_web:index' %}">overview</a>
-            | <a href="{% url 'networking_web:settings' %}">settings</a>
-            | <a href="{% url 'account_logout' %}">logout</a>
-        </p>
+        <div class="mt-3 small">
+            <p class="float-right">
+                <a href="{% url 'index' %}">back to home</a>
+                | <a href="{% url 'account_logout' %}">logout</a>
+            </p>
+            <p>
+                <a href="{% url 'networking_web:index' %}">overview</a>
+                | <a href="{% url 'networking_web:settings' %}">import/export</a>
+            </p>
+        </div>
+
+        {% if messages %}
+            <div>
+                <strong>Messages:</strong>
+                <ul>
+                    {% for message in messages %}
+                        <li>{{message}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
         {% block content %}{% endblock %}
     </div>
 
