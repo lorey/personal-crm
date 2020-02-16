@@ -17,7 +17,9 @@
                     <div class="input-group">
                         <input name="search" type="text" class="form-control" placeholder="Search..." value="{{ query|default_if_none:'' }}">
                         <div class="input-group-append">
-                            <button type="submit" class="btn btn-primary">Search</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="material-icons">search</i>
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -27,7 +29,7 @@
                     <div class="row">
                         <div class="col-md-2">
                             <a class="btn btn-primary m-2" href="{% url 'networking_web:add-touchpoint' contact.id %}" title="Mark contact as done">
-                                <ion-icon name="checkmark-outline"></ion-icon>
+                                <i class="material-icons">done</i>
                             </a>
                         </div>
                         <div class="col-md-6 mb-5">
