@@ -1,4 +1,4 @@
-{% extends 'web/_base.html' %}
+{% extends './_base.html' %}
 
 {% block title %}Home{% endblock %}
 
@@ -27,14 +27,20 @@
             <div>
                 {% for contact in contacts %}
                     <div class="row">
-                        <div class="col-md-2">
-                            <a class="btn btn-primary m-2" href="{% url 'networking_web:add-touchpoint' contact.id %}" title="Mark contact as done">
+                        <div class="col-lg-2">
+                            <a class="btn btn-primary mt-2" href="{% url 'networking_web:add-touchpoint' contact.id %}" title="Mark contact as done">
                                 <i class="material-icons">done</i>
                             </a>
                         </div>
-                        <div class="col-md-6 mb-5">
+                        <div class="col-lg-6 mb-5">
                             <strong>{{ contact.name }}</strong><br>
-                            last: {{ contact.get_last_touchpoint.when|timesince }} ago<br>
+                            last:
+                            {% if contact.get_last_touchpoint %}
+                            {{ contact.get_last_touchpoint.when|timesince }} ago
+                            {% else %}
+                            never
+                            {% endif %}
+                            <br>
                             frequency: {{ contact.frequency_in_days }} days
                             <a class="btn btn-light btn-sm" href="{% url 'networking_web:change-frequency' contact.id 'decrease' %}">-</a>
                             <a class="btn btn-light btn-sm" href="{% url 'networking_web:change-frequency' contact.id 'increase' %}">+</a>

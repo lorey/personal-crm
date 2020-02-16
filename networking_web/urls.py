@@ -13,4 +13,5 @@ urlpatterns = [
         views.change_frequency,
         name="change-frequency",
     ),
+    path("import/csv", views.import_csv_start, name="import-csv"),
 ]

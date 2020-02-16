@@ -1,0 +1,23 @@
+{% extends './_base.html' %}
+
+{% block content %}
+    <h1>Import CSV</h1>
+    <p>To import CSV, just upload your file here, select the column mapping, and you're done.</p>
+
+    <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="csv" class="form-control-file mb-3">
+        <p>Select a file, you can map columns to contact attributes in the next step.</p>
+    <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+
+    <p>Sources:</p>
+    <ul>
+    <li>
+        <a href="https://contacts.google.com/frequent">Google Contacts</a>:
+        Choose the contacts you want to export or none if you want to export all.
+        Click export in the sidebar.
+        Choose "Export as Google CSV".
+    </li>
+    </ul>
+{% endblock %}

@@ -2,10 +2,11 @@ from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from pytz import UTC
 
 from networking_base.models import Contact, Touchpoint
+from networking_base.views import create_contacts_from_file_handle
 
 
 @login_required
@@ -54,6 +55,24 @@ def change_frequency(request, contact_id, method):
     contact.frequency_in_days = max(contact.frequency_in_days + methods[method], 1)
     contact.save()
     return redirect_back(request)
+
+
+@login_required
+def import_csv_start(request):
+    if request.method == "POST":
+        content = request.FILES["csv"]
+        owner = request.user
+        col_name = "Name"
+        col_email = "E-mail 1 - Value"
+        contacts = create_contacts_from_file_handle(content, owner, col_email, col_name)
+        for c in contacts:
+            defaults = {k: getattr(c, k) for k in ["frequency_in_days"]}
+            o_new, was_created = Contact.objects.get_or_create(
+                name=c.name, email=c.email, user=request.user, defaults=defaults
+            )
+
+        return redirect("networking_web:index")
+    return render(request, "web/import-csv.html")
 
 
 def redirect_back(request):

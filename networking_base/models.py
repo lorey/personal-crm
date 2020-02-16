@@ -12,6 +12,7 @@ class Contact(models.Model):
     user = models.ForeignKey(User, models.CASCADE)
 
     # contact details
+    email = models.CharField(max_length=100, null=True, blank=True)
     linkedin_url = models.CharField(max_length=100, null=True, blank=True)
     twitter_username = models.CharField(max_length=50, null=True, blank=True)
     phone_number = models.TextField(max_length=50, null=True, blank=True)
