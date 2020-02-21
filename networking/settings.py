@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",  # required by allauth
+    # addons
+    "crispy_forms",
     # apps
     # has to be included before allauth to make templates work
     # otherwise base.html is set by allauth(?)
@@ -131,3 +133,5 @@ SITE_ID = 1
 
 # set redirect after successful login
 LOGIN_REDIRECT_URL = "networking_web:index"
+
+CRISPY_TEMPLATE_PACK = "bootstrap4"

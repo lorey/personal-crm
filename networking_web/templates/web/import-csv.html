@@ -1,7 +1,8 @@
-{% extends './_base.html' %}
+{% extends './layouts/2-columns.html' %}
 
-{% block content %}
-    <h1>Import CSV</h1>
+{% block heading %}Import CSV{% endblock %}
+
+{% block left %}
     <p>To import CSV, just upload your file here, select the column mapping, and you're done.</p>
 
     <form method="post" enctype="multipart/form-data">
@@ -10,7 +11,9 @@
         <p>Select a file, you can map columns to contact attributes in the next step.</p>
     <button type="submit" class="btn btn-primary">Upload</button>
     </form>
+{% endblock %}
 
+{% block right %}
     <p>Sources:</p>
     <ul>
     <li>

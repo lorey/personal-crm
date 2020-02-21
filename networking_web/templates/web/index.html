@@ -1,80 +1,78 @@
-{% extends './_base.html' %}
+{% extends './layouts/2-columns.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Keep in touch: Home{% endblock %}
 
-{% block content %}
-    <h1 class="display-1 mt-5 mb-5">Keep in touch</h1>
-    <div class="row">
-        <div class="col-md-5">
-            <p>
-                <a href="{% url 'networking_web:index' %}">due contacts</a>
-                | <a href="{% url 'networking_web:index' %}?all=true">all contacts</a>
-                | <a href="">create contact</a>
-            </p>
-            <div class="mb-3">
-                <form method="get" action="{% url 'networking_web:index' %}?all=true">
-                    <input type="hidden" name="all" value="true">
-                    <div class="input-group">
-                        <input name="search" type="text" class="form-control" placeholder="Search..." value="{{ query|default_if_none:'' }}">
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="material-icons">search</i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
+{% block heading %}Keep in touch{% endblock %}
+
+{% block left %}
+    <p>
+        <a href="{% url 'networking_web:index' %}">due contacts</a>
+        | <a href="{% url 'networking_web:index' %}?all=true">all contacts</a>
+        | <a href="{% url 'networking_web:contact-create' %}">create contact</a>
+    </p>
+    <div class="mb-3">
+        <form method="get" action="{% url 'networking_web:index' %}?all=true">
+            <input type="hidden" name="all" value="true">
+            <div class="input-group">
+                <input name="search" type="text" class="form-control" placeholder="Search..." value="{{ query|default_if_none:'' }}">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="material-icons">search</i>
+                    </button>
+                </div>
             </div>
-            <div>
-                {% for contact in contacts %}
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <a class="btn btn-primary mt-2" href="{% url 'networking_web:add-touchpoint' contact.id %}" title="Mark contact as done">
-                                <i class="material-icons">done</i>
-                            </a>
-                        </div>
-                        <div class="col-lg-6 mb-5">
-                            <strong>{{ contact.name }}</strong><br>
-                            last:
-                            {% if contact.get_last_touchpoint %}
-                            {{ contact.get_last_touchpoint.when|timesince }} ago
-                            {% else %}
-                            never
-                            {% endif %}
-                            <br>
-                            frequency: {{ contact.frequency_in_days }} days
-                            <a class="btn btn-light btn-sm" href="{% url 'networking_web:change-frequency' contact.id 'decrease' %}">-</a>
-                            <a class="btn btn-light btn-sm" href="{% url 'networking_web:change-frequency' contact.id 'increase' %}">+</a>
-                        </div>
-                    </div>
-                {% endfor %}
-
-                {% if not query and not contacts %}
-                    <div class="alert alert-info">
-                        <strong>Social Debt Zero</strong>
-                        You've hit "Social Debt Zero", the equivalent of "Inbox Zero".
-                        Congratulations!
-                    </div>
-                {% endif %}
-
-                {% if query and not contacts %}
-                    <div class="alert alert-info">
-                        There's no contact containing "{{ query }}".
-                        <a href="">Create one</a>.
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-        <div class="col-md-5 offset-1">
-            <h1>How it works</h1>
-            <p>
-                Keep in touch lets you store contacts with a frequency to get in touch with them, e.g. 7 days to get in touch once a week.
-                If you haven't contacted the person for this timespan,
-                they will pop up above to remind you to get in touch.
-                After you've gotten in touch, mark the task as done and get reminded once the interval is over again.
-            </p>
-            <p>
-                It's that easy to keep in touch once in a while!
-            </p>
-        </div>
+        </form>
     </div>
+    <div>
+        {% for contact in contacts %}
+            <div class="row">
+                <div class="col-lg-2">
+                    <a class="btn btn-primary mt-2" href="{% url 'networking_web:add-touchpoint' contact.id %}" title="Mark contact as done">
+                        <i class="material-icons">done</i>
+                    </a>
+                </div>
+                <div class="col-lg-6 mb-5">
+                    <strong><a href="{% url 'networking_web:contact-view' contact.id %}">{{ contact.name }}</a></strong><br>
+                    last:
+                    {% if contact.get_last_touchpoint %}
+                    {{ contact.get_last_touchpoint.when|timesince }} ago
+                    {% else %}
+                    never
+                    {% endif %}
+                    <br>
+                    frequency: {{ contact.frequency_in_days }} days
+                    <a class="btn btn-light btn-sm" href="{% url 'networking_web:change-frequency' contact.id 'decrease' %}">-</a>
+                    <a class="btn btn-light btn-sm" href="{% url 'networking_web:change-frequency' contact.id 'increase' %}">+</a>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% if not query and not contacts %}
+            <div class="alert alert-info">
+                <strong>Social Debt Zero</strong>
+                You've hit "Social Debt Zero", the equivalent of "Inbox Zero".
+                Congratulations!
+            </div>
+        {% endif %}
+
+        {% if query and not contacts %}
+            <div class="alert alert-info">
+                There's no contact containing "{{ query }}".
+                <a href="">Create one</a>.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block right %}
+    <h1>How it works</h1>
+    <p>
+        Keep in touch lets you store contacts with a frequency to get in touch with them, e.g. 7 days to get in touch once a week.
+        If you haven't contacted the person for this timespan,
+        they will pop up above to remind you to get in touch.
+        After you've gotten in touch, mark the task as done and get reminded once the interval is over again.
+    </p>
+    <p>
+        It's that easy to keep in touch once in a while!
+    </p>
 {% endblock %}

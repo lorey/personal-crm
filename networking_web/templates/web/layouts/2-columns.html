@@ -1,0 +1,15 @@
+{% extends '../_base.html' %}
+
+{% block title %}Keep in touch: Home{% endblock %}
+
+{% block content %}
+<h1 class="display-1 mt-5 mb-5">{% block heading %}{% endblock %}</h1>
+<div class="row">
+    <div class="col-md-5">
+        {% block left %}{% endblock %}
+    </div>
+    <div class="offset-1 col-md-5">
+        {% block right %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

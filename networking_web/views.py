@@ -3,10 +3,60 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.views.generic import DetailView, UpdateView, CreateView, DeleteView
 from pytz import UTC
 
 from networking_base.models import Contact, Touchpoint
 from networking_base.views import create_contacts_from_file_handle
+
+CONTACT_FIELDS_DEFAULT = [
+    "name",
+    "frequency_in_days",
+    "description",
+    "email",
+    "linkedin_url",
+    "twitter_username",
+    "phone_number",
+]
+
+
+class ContactDetailView(DetailView):
+    model = Contact
+    template_name = "web/contact_detail.html"
+
+
+class ContactUpdateView(UpdateView):
+    model = Contact
+    fields = CONTACT_FIELDS_DEFAULT
+    template_name = "web/contact_form.html"
+
+    def get_success_url(self):
+        return reverse("networking_web:contact-view", kwargs={"pk": self.object.id})
+
+
+class ContactCreateView(CreateView):
+    model = Contact
+    fields = CONTACT_FIELDS_DEFAULT
+    template_name = "web/contact_form.html"
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.user_id = self.request.user.id
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse("networking_web:contact-view", kwargs={"pk": self.object.id})
+
+
+class ContactDeleteView(DeleteView):
+    model = Contact
+    template_name = "web/contact_confirm_delete.html"
+
+    def get_success_url(self):
+        success_url = reverse("networking_web:index")
+        return success_url
 
 
 @login_required

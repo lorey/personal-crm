@@ -7,15 +7,15 @@ from pytz import UTC
 
 class Contact(models.Model):
     name = models.CharField(max_length=50)
-    description = models.TextField()
     frequency_in_days = models.IntegerField()
     user = models.ForeignKey(User, models.CASCADE)
 
     # contact details
+    description = models.TextField(null=True, blank=True)
     email = models.CharField(max_length=100, null=True, blank=True)
     linkedin_url = models.CharField(max_length=100, null=True, blank=True)
     twitter_username = models.CharField(max_length=50, null=True, blank=True)
-    phone_number = models.TextField(max_length=50, null=True, blank=True)
+    phone_number = models.CharField(max_length=50, null=True, blank=True)
 
     def get_last_touchpoint(self):
         sorted_by_last = sorted(self.touchpoint_set.all(), key=lambda t: t.when, reverse=True)

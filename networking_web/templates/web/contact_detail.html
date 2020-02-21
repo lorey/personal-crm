@@ -1,0 +1,54 @@
+{% extends './layouts/2-columns.html' %}
+
+{% block title %}{{ contact.name }}{% endblock %}
+
+{% block heading %}{{ contact.name }}{% endblock %}
+
+{% block left %}
+    <blockquote class="blockquote">
+        {{ contact.description|default:'No description' }}
+    </blockquote>
+
+    <h3 class="mt-5">Last Touchpoints</h3>
+    {% if contact.touchpoint_set.all %}
+        <p>These are your touchpoints:</p>
+        <ul>
+            {% for touchpoint in contact.touchpoint_set.all %}
+                <li>
+                    {{ touchpoint.when|timesince }} ago
+                    ({{ touchpoint.when|date }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't been in touch so far.</p>
+    {% endif %}
+{% endblock %}
+
+{% block right %}
+    {% if contact.email %}
+    <p>Email:</p>
+    <ul>
+        <li>
+            <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
+        </li>
+    </ul>
+    {% endif %}
+
+    {% if contact.phone_number %}
+    <p>Phone</p>
+    <ul>
+        <li>
+            <a href="tel:{{ contact.phone_number }}">{{ contact.phone_number }}</a>
+        </li>
+        <li>
+            <a href="https://wa.me/{{ contact.phone_number|urlencode }}?text={{ 'Hallo' }}" target="_blank">WhatsApp</a>
+        </li>
+    </ul>
+    {% endif %}
+
+    <p>
+        <a class="btn btn-primary btn-sm" href="{% url "networking_web:contact-update" contact.id %}">edit</a>
+        <a class="btn btn-danger btn-sm" href="{% url "networking_web:contact-delete" contact.id %}">delete</a>
+    </p>
+{% endblock %}
