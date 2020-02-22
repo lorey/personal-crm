@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.views.generic import DetailView, UpdateView, CreateView, DeleteView
+from django.views.generic import DetailView, UpdateView, CreateView, DeleteView, ListView
 from pytz import UTC
 
 from networking_base.models import Contact, Touchpoint
@@ -20,6 +20,12 @@ CONTACT_FIELDS_DEFAULT = [
     "twitter_username",
     "phone_number",
 ]
+
+
+class ContactListView(ListView):
+    model = Contact
+    template_name = "web/contact_overview.html"
+    ordering = "name"
 
 
 class ContactDetailView(DetailView):

@@ -10,3 +10,8 @@ which should be
 ```
 /root/.local/share/virtualenvs/code-_Py8Si6I/bin/python
 ```
+
+## ToDo
+* Improve import by editing afterwards
+* Improve import by extracting and using emails
+* Merging contacts

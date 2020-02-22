@@ -4,6 +4,8 @@
 
 {% block heading %}Keep in touch{% endblock %}
 
+{% load timesince_coarse %}
+
 {% block left %}
     <p>
         <a href="{% url 'networking_web:index' %}">due contacts</a>
@@ -35,14 +37,19 @@
                     <strong><a href="{% url 'networking_web:contact-view' contact.id %}">{{ contact.name }}</a></strong><br>
                     last:
                     {% if contact.get_last_touchpoint %}
-                    {{ contact.get_last_touchpoint.when|timesince }} ago
+                    {{ contact.get_last_touchpoint.when|timesince_coarse }} ago
                     {% else %}
                     never
                     {% endif %}
+
+                    {% if contact.get_last_touchpoint %}
                     <br>
-                    frequency: {{ contact.frequency_in_days }} days
-                    <a class="btn btn-light btn-sm" href="{% url 'networking_web:change-frequency' contact.id 'decrease' %}">-</a>
-                    <a class="btn btn-light btn-sm" href="{% url 'networking_web:change-frequency' contact.id 'increase' %}">+</a>
+                    {% if contact.get_urgency > 0 %}
+                    due since {{ contact.get_due_date|timesince_coarse }}
+                    {% else %}
+                    due in {{ contact.get_due_date|timeuntil_coarse }}
+                    {% endif %}
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}

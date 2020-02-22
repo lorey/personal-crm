@@ -23,14 +23,16 @@ class Contact(models.Model):
 
     def get_urgency(self):
         now = datetime.now(tz=UTC)
+        return (now - self.get_due_date()).days
 
+    def get_due_date(self):
         last_touchpoint = self.get_last_touchpoint()
         if last_touchpoint:
             last_touchpoint_date = last_touchpoint.when
         else:
+            now = datetime.now(tz=UTC)
             last_touchpoint_date = now - timedelta(days=365)
-        days_since_touchpoint = (now - last_touchpoint_date).days
-        return days_since_touchpoint - self.frequency_in_days
+        return last_touchpoint_date + timedelta(days=self.frequency_in_days)
 
     def __str__(self):
         return self.name
