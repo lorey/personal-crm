@@ -75,7 +75,7 @@ def index(request):
     is_show_all = request.GET.get("all") == "true"
     if not is_show_all:
         contacts_urgent = (c for c in contacts if c.get_urgency() > 0)
-        contacts = sorted(contacts_urgent, key=lambda c: c.get_urgency())
+        contacts = sorted(contacts_urgent, key=lambda c: c.get_urgency(), reverse=True)
     return render(
         request,
         "web/index.html",
@@ -100,9 +100,9 @@ def add_touchpoint(request, contact_id):
 def change_frequency(request, contact_id, method):
     contact = Contact.objects.get(pk=contact_id)
     assert contact.user == request.user
-    methods = {"increase": 1, "decrease": -1}
+    methods = {"increase": 2, "decrease": 0.5}
     # make sure frequency stays positive
-    contact.frequency_in_days = max(contact.frequency_in_days + methods[method], 1)
+    contact.frequency_in_days = max(contact.frequency_in_days * methods[method], 1)
     contact.save()
     return redirect_back(request)
 
