@@ -1,0 +1,31 @@
+{% extends './layouts/2-columns.html' %}
+
+{% block heading %}Import Trello{% endblock %}
+
+{% block left %}
+    <p>
+        To import a Trello board, go to:
+        </p>
+    <ul><li>Menu</li><li>More</li><li>Print and Export</li><li>Export as JSON</li></ul>
+    <p>and save the resulting file.</p>
+    <p>
+        Then upload your file here and you're done.
+    </p>
+
+    <h3>Card Format</h3>
+    <p>
+        We expect you to have the contact's name as the card's title.
+        If there's a due date, we'll try to infer the desired frequency.
+        The rest will be inferred if possible.
+    </p>
+
+    <h3>Upload</h3>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="json" class="form-control-file mb-3">
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+{% endblock %}
+
+{% block right %}
+{% endblock %}

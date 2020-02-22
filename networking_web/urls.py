@@ -18,4 +18,5 @@ urlpatterns = [
         name="change-frequency",
     ),
     path("import/csv", views.import_csv_start, name="import-csv"),
+    path("import/trello", views.import_trello_start, name="import-trello"),
 ]

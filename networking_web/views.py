@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
@@ -8,7 +9,7 @@ from django.views.generic import DetailView, UpdateView, CreateView, DeleteView
 from pytz import UTC
 
 from networking_base.models import Contact, Touchpoint
-from networking_base.views import create_contacts_from_file_handle
+from networking_base.views import create_contacts_from_file_handle, create_contacts_from_trello
 
 CONTACT_FIELDS_DEFAULT = [
     "name",
@@ -123,6 +124,15 @@ def import_csv_start(request):
 
         return redirect("networking_web:index")
     return render(request, "web/import-csv.html")
+
+
+@login_required
+def import_trello_start(request):
+    if request.method == "POST":
+        json_data = json.load(request.FILES["json"].open())
+        create_contacts_from_trello(json_data, request.user)
+        return redirect("networking_web:index")
+    return render(request, "web/import-trello.html")
 
 
 def redirect_back(request):
