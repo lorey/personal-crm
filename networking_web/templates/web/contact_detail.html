@@ -6,7 +6,7 @@
 
 {% block left %}
     <blockquote class="blockquote">
-        {{ contact.description|default:'No description' }}
+        {{ contact.description|linebreaksbr|default:'No description' }}
     </blockquote>
 
     <h3 class="mt-5">Last Touchpoints</h3>
