@@ -22,6 +22,15 @@ It's that easy to keep in touch once in a while!
 * create contacts with name, frequency, description, and options to get in touch (email, twitter, linkedin, phone)
 * import cards from trello (which I used before)
 
+## Installation
+The setup with [docker-compose](https://docs.docker.com/compose/) to install and run everything should take less than a minute.
+
+1. run the container (in the background): `docker-compose up -d`
+2. create a user for yourself: `docker-compose exec web ./manage.py createsuperuser`
+3. open a browser at `localhost:8008` and sign in with the superuser credentials
+
+The directory is mounted into the container, the database can be found at `./db.sqlite3`, e.g. to edit or backup.
+
 ## Development
 ### Set up PyCharm
 To set up a remote interpreter for PyCharm, choose docker-compose, the `web` service.
