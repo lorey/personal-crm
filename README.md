@@ -3,6 +3,8 @@ This is a personal CRM I built for myself.
 It reminds me to get in touch with my contacts from time to time.
 It's a super-small project built in Django, fully dockerized, running locally.
 
+![Screenshot of my personal CRM](screenshot.png)
+
 ## How it works
 Keep in touch lets you store contacts with a frequency to get in touch with them, e.g. 7 days to get in touch once a week. 
 If you haven't contacted the person for this timespan, 
