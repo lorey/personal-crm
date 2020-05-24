@@ -65,7 +65,7 @@
         {% if query and not contacts %}
             <div class="alert alert-info">
                 There's no contact containing "{{ query }}".
-                <a href="">Create one</a>.
+                <a href="{% url "networking_web:contact-create" %}">Create one</a>.
             </div>
         {% endif %}
     </div>

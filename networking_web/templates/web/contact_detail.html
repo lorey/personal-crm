@@ -9,7 +9,12 @@
         {{ contact.description|linebreaksbr|default:'No description' }}
     </blockquote>
 
-    <h3 class="mt-5">Last Touchpoints</h3>
+    <h3 class="mt-5">
+        Last Touchpoints
+        <a href="{% url "networking_web:add-touchpoint" contact.id %}" class="btn btn-primary btn-sm">
+            add touchpoint
+        </a>
+    </h3>
     {% if contact.touchpoint_set.all %}
         <p>These are your touchpoints:</p>
         <ul>
@@ -26,6 +31,7 @@
 {% endblock %}
 
 {% block right %}
+    <p>Frequency: {{ contact.frequency_in_days }} days</p>
     {% if contact.email %}
     <p>Email:</p>
     <ul>

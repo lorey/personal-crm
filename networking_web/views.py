@@ -5,11 +5,20 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.views.generic import DetailView, UpdateView, CreateView, DeleteView, ListView
+from django.views.generic import (
+    DetailView,
+    UpdateView,
+    CreateView,
+    DeleteView,
+    ListView,
+)
 from pytz import UTC
 
 from networking_base.models import Contact, Touchpoint
-from networking_base.views import create_contacts_from_file_handle, create_contacts_from_trello
+from networking_base.views import (
+    create_contacts_from_file_handle,
+    create_contacts_from_trello,
+)
 
 CONTACT_FIELDS_DEFAULT = [
     "name",
