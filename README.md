@@ -1,18 +1,17 @@
 # Keep in touch | my personal CRM
 This is a personal CRM I built for myself.
 It reminds me to get in touch with my contacts from time to time.
-It's a super-small project built in Django, fully dockerized, running locally.
+It's a super-small project built with Django, fully dockerized, running locally.
+So you can host it wherever you like, hack it however you like, and query the DB with SQL to find out whatever you like.
 
 ![Screenshot of my personal CRM](screenshot.png)
 
 ## How it works
 Keep in touch lets you store contacts with a frequency to get in touch with them, e.g. 7 days to get in touch once a week. 
-If you haven't contacted the person for this timespan, 
-they will be marked as due to remind you to get in touch. 
-After you've gotten in touch, 
-mark the it as done and get reminded once the interval is over again.
+* If you haven't contacted the person for this timespan, they will be marked as due to remind you to get in touch. 
+* After you've gotten in touch, create a touchpoint and get reminded once the interval is over again.
 
-It's that easy to keep in touch once in a while! 
+It's that easy to keep in touch once in a while and has helped me to say in touch with a lot of my contacts.
 
 ## Features
 * show due contacts to see who to get in touch with
@@ -50,4 +49,5 @@ which should be
 * add type of touchpoint and note functionality
 
 ## Related projects
+* There's a fully featured, open source personal crm called [monica](https://github.com/monicahq/monica) (PHP, Laravel)
 * If you're looking for more features like a diary, notes, relationships, or properties, there's [jens-ox/prm](https://github.com/jens-ox/prm)
