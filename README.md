@@ -14,6 +14,14 @@ mark the it as done and get reminded once the interval is over again.
 
 It's that easy to keep in touch once in a while! 
 
+## Features
+* show due contacts to see who to get in touch with
+* create touchpoints to remember interactions
+* list all contacts with last and next interaction
+* search for contacts to save specific interactions
+* create contacts with name, frequency, description, and options to get in touch (email, twitter, linkedin, phone)
+* import cards from trello (which I used before)
+
 ## Development
 ### Set up PyCharm
 To set up a remote interpreter for PyCharm, choose docker-compose, the `web` service.
