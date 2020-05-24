@@ -4,7 +4,7 @@ It reminds me to get in touch with my contacts from time to time.
 It's a super-small project built with Django, fully dockerized, running locally.
 So you can host it wherever you like, hack it however you like, and query the DB with SQL to find out whatever you like.
 
-![Screenshot of my personal CRM](screenshot.png)
+![Cheesy mockup with a screenshot of my personal CRM](.github/macbook.jpg)
 
 ## How it works
 Keep in touch lets you store contacts with a frequency to get in touch with them, e.g. 7 days to get in touch once a week. 
