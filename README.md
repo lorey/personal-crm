@@ -39,3 +39,6 @@ which should be
 * Improve import by extracting and using emails
 * Merging contacts
 * add type of touchpoint and note functionality
+
+## Related projects
+* If you're looking for more features like a diary, notes, relationships, or properties, there's [jens-ox/prm](https://github.com/jens-ox/prm)
