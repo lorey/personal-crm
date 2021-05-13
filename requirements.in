@@ -1,5 +1,9 @@
 # toolchain
+black
+isort
+flake8
 pip-tools
+pylint
 
 # app
 django
