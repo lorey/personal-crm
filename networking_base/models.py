@@ -18,7 +18,9 @@ class Contact(models.Model):
     phone_number = models.CharField(max_length=50, null=True, blank=True)
 
     def get_last_touchpoint(self):
-        sorted_by_last = sorted(self.touchpoint_set.all(), key=lambda t: t.when, reverse=True)
+        sorted_by_last = sorted(
+            self.touchpoint_set.all(), key=lambda t: t.when, reverse=True
+        )
         return next(iter(sorted_by_last), None)
 
     def get_urgency(self):

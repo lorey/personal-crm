@@ -44,7 +44,9 @@ def create_contacts_from_trello(trello_json, user, frequency_default=7):
     return contacts
 
 
-def create_contact_from_trello_card(card: dict, user, frequency_default=7, labels_by_id=None):
+def create_contact_from_trello_card(
+    card: dict, user, frequency_default=7, labels_by_id=None
+):
     if not labels_by_id:
         labels_by_id = {}
 
@@ -55,7 +57,10 @@ def create_contact_from_trello_card(card: dict, user, frequency_default=7, label
         contact, was_created = Contact.objects.get_or_create(
             name=card["name"],
             user=user,
-            defaults={"frequency_in_days": frequency_default, "description": card_description},
+            defaults={
+                "frequency_in_days": frequency_default,
+                "description": card_description,
+            },
         )
     except MultipleObjectsReturned:
         # user might have several people with the same name...
@@ -80,7 +85,9 @@ def make_card_description(card, labels_card):
         content_parts.append(card["desc"])
 
     # add one label per row
-    card_label_desc = ["Label: {name} ({color})".format(**label) for label in labels_card]
+    card_label_desc = [
+        "Label: {name} ({color})".format(**label) for label in labels_card
+    ]
     if card_label_desc:
         content_parts.append("\n".join(card_label_desc))
 

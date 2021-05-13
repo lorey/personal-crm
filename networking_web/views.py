@@ -3,14 +3,14 @@ from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import (
-    DetailView,
-    UpdateView,
     CreateView,
     DeleteView,
+    DetailView,
     ListView,
+    UpdateView,
 )
 from pytz import UTC
 
