@@ -25,8 +25,9 @@ It's that easy to keep in touch once in a while and has helped me to say in touc
 The setup with [docker-compose](https://docs.docker.com/compose/) to install and run everything should take less than a minute.
 
 1. run the container (in the background): `docker-compose up -d`
-2. create a user for yourself: `docker-compose exec web ./manage.py createsuperuser`
-3. open a browser at `localhost:8008` and sign in with the superuser credentials
+2. create a database with `docker-compose exec web ./manage.py migrate` 
+3. create a user for yourself: `docker-compose exec web ./manage.py createsuperuser`
+4. open a browser at `localhost:8008` and sign in with the superuser credentials
 
 The directory is mounted into the container, the database can be found at `./db.sqlite3`, e.g. to edit or backup.
 
