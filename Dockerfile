@@ -1,9 +1,8 @@
 FROM python:3.8
 
 WORKDIR /code
-COPY Pipfile* /code/
-RUN pip3 install pipenv
-RUN pipenv install --dev
+COPY requirements.* /code/
+RUN pip install -r requirements.txt
 
 # all files to avoid missing files
 # just makes containers a litte bigger

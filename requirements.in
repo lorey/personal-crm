@@ -1,0 +1,8 @@
+# toolchain
+pip-tools
+
+# app
+django
+django-allauth
+pandas
+django-crispy-forms
