@@ -31,6 +31,14 @@ The setup with [docker-compose](https://docs.docker.com/compose/) to install and
 
 The directory is mounted into the container, the database can be found at `./db.sqlite3`, e.g. to edit or backup.
 
+### Use the Google integration
+Enable Google OAuth to use automated contact, calendar, and interaction discovery:
+
+- see https://django-allauth.readthedocs.io/en/latest/providers.html#google
+- in admin, change site to localhost
+- add social app: http://localhost:8008/admin/socialaccount/socialapp/add/
+- connect your account at http://localhost:8008/accounts/social/connections/
+
 ## ToDo
 * Improve import by editing afterwards
 * Improve import by extracting and using emails
