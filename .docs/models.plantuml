@@ -1,0 +1,45 @@
+@startuml
+class User
+
+class Contact
+Contact : name
+Contact : last_interaction_on
+User -- Contact
+
+class EmailAddress
+EmailAddress : email
+Contact --{ EmailAddress
+
+class PhoneNumber
+PhoneNumber : phone
+Contact --{ PhoneNumber
+
+class ContactPlan
+ContactPlan : frequency
+Contact - ContactPlan
+
+class Reminder
+Reminder : due
+Reminder : skipped_on
+Contact --{ Reminder
+ContactPlan --> Reminder
+
+class Interaction
+Interaction : title
+Interaction : description
+Interaction : interacted_on
+Contact --{ Interaction
+
+class EmailInteraction
+Interaction <|-- EmailInteraction
+EmailAddress -- EmailInteraction
+
+class CalendarInteraction
+Interaction <|-- CalendarInteraction
+EmailAddress -- CalendarInteraction
+
+class PhoneInteraction
+Interaction <|-- PhoneInteraction
+PhoneNumber -- PhoneInteraction
+
+@enduml

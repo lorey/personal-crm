@@ -45,6 +45,9 @@ Enable Google OAuth to use automated contact, calendar, and interaction discover
 * Merging contacts
 * add type of touchpoint and note functionality
 
+## Data Model
+![data model](.docs/models.png)
+
 ## Related projects
 * There's a fully featured, open source personal crm called [monica](https://github.com/monicahq/monica) (PHP, Laravel)
 * If you're looking for more features like a diary, notes, relationships, or properties, there's [jens-ox/prm](https://github.com/jens-ox/prm)
