@@ -1,45 +1,59 @@
 @startuml
-class User
+class User {
+    id
+}
 
-class Contact
-Contact : name
-Contact : last_interaction_on
+class Contact {
+    name
+    last_interaction_on
+}
 User -- Contact
 
-class EmailAddress
-EmailAddress : email
+class EmailAddress {
+    email
+}
 Contact --{ EmailAddress
 
-class PhoneNumber
-PhoneNumber : phone
+class PhoneNumber {
+    phone
+}
 Contact --{ PhoneNumber
 
-class ContactPlan
-ContactPlan : frequency
+class ContactPlan {
+    frequency
+}
 Contact - ContactPlan
 
-class Reminder
-Reminder : due
-Reminder : skipped_on
+class Reminder {
+    due
+    skipped_on
+}
 Contact --{ Reminder
 ContactPlan --> Reminder
 
-class Interaction
-Interaction : title
-Interaction : description
-Interaction : interacted_on
+class Interaction {
+    title
+    description
+    interacted_on
+}
 Contact --{ Interaction
 
-class EmailInteraction
+enum InteractionType {
+    Personal
+    Video
+    Voice
+    Text
+}
+InteractionType -- Interaction
+
+class EmailInteraction {
+    gmail_message_id
+}
 Interaction <|-- EmailInteraction
 EmailAddress -- EmailInteraction
 
-class CalendarInteraction
+class CalendarInteraction {}
 Interaction <|-- CalendarInteraction
 EmailAddress -- CalendarInteraction
-
-class PhoneInteraction
-Interaction <|-- PhoneInteraction
-PhoneNumber -- PhoneInteraction
 
 @enduml
