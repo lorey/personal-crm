@@ -1,5 +1,10 @@
+import time
+from datetime import datetime, timedelta
+
 from django.contrib.auth.models import User
 from django.db import models
+
+LAST_INTERACTION_DEFAULT = datetime.now().astimezone() - timedelta(days=365)
 
 
 class Contact(models.Model):
@@ -12,6 +17,25 @@ class Contact(models.Model):
     linkedin_url = models.URLField(max_length=100, null=True, blank=True)
     twitter_url = models.URLField(max_length=100, null=True, blank=True)
     phone_number = models.CharField(max_length=50, null=True, blank=True)
+
+    def get_last_interaction(self):
+        return self.interactions.order_by("-was_at").first()
+
+    def get_last_interaction_date_or_default(self):
+        li = self.get_last_interaction()
+        lid = LAST_INTERACTION_DEFAULT
+        if li:
+            lid = li.was_at
+        return lid
+
+    def get_urgency(self):
+        last_interaction_date = self.get_last_interaction_date_or_default()
+        time_since_interaction = datetime.now().astimezone() - last_interaction_date
+        return time_since_interaction.days > self.frequency_in_days
+
+    def get_due_date(self):
+        last_interaction_date = self.get_last_interaction_date_or_default()
+        return last_interaction_date + timedelta(days=self.frequency_in_days)
 
     def __str__(self):
         return self.name
@@ -40,7 +64,7 @@ class Interaction(models.Model):
     An interaction with a specific contact.
     """
 
-    contact = models.ForeignKey(Contact, models.CASCADE)
+    contact = models.ForeignKey(Contact, models.CASCADE, related_name="interactions")
     type = models.ForeignKey(InteractionType, models.SET_NULL, blank=True, null=True)
 
     title = models.CharField(max_length=100)

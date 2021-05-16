@@ -16,7 +16,8 @@
         <form method="get" action="{% url 'networking_web:index' %}?all=true">
             <input type="hidden" name="all" value="true">
             <div class="input-group">
-                <input name="search" type="text" class="form-control" placeholder="Search..." value="{{ query|default_if_none:'' }}">
+                <input name="search" type="text" class="form-control" placeholder="Search..."
+                       value="{{ query|default_if_none:'' }}">
                 <div class="input-group-append">
                     <button type="submit" class="btn btn-primary">
                         <i class="material-icons">search</i>
@@ -29,26 +30,27 @@
         {% for contact in contacts %}
             <div class="row">
                 <div class="col-lg-2">
-                    <a class="btn btn-primary mt-2" href="{% url 'networking_web:add-touchpoint' contact.id %}" title="Mark contact as done">
+                    <a class="btn btn-primary mt-2" href="{% url 'networking_web:add-touchpoint' contact.id %}"
+                       title="Mark contact as done">
                         <i class="material-icons">done</i>
                     </a>
                 </div>
                 <div class="col-lg-6 mb-5">
                     <strong><a href="{% url 'networking_web:contact-view' contact.id %}">{{ contact.name }}</a></strong><br>
                     last:
-                    {% if contact.get_last_touchpoint %}
-                    {{ contact.get_last_touchpoint.when|timesince_coarse }} ago
+                    {% if contact.get_last_interaction %}
+                        {{ contact.get_last_interaction.was_at|timesince_coarse }} ago
                     {% else %}
-                    never
+                        never
                     {% endif %}
 
-                    {% if contact.get_last_touchpoint %}
-                    <br>
-                    {% if contact.get_urgency > 0 %}
-                    due since {{ contact.get_due_date|timesince_coarse }}
-                    {% else %}
-                    due in {{ contact.get_due_date|timeuntil_coarse }}
-                    {% endif %}
+                    {% if contact.get_last_interaction %}
+                        <br>
+                        {% if contact.get_urgency > 0 %}
+                            due since {{ contact.get_due_date|timesince_coarse }}
+                        {% else %}
+                            due in {{ contact.get_due_date|timeuntil_coarse }}
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -74,7 +76,8 @@
 {% block right %}
     <h1>How it works</h1>
     <p>
-        Keep in touch lets you store contacts with a frequency to get in touch with them, e.g. 7 days to get in touch once a week.
+        Keep in touch lets you store contacts with a frequency to get in touch with them,
+        e.g. 7 days to get in touch once a week.
         If you haven't contacted the person for this timespan,
         they will pop up above to remind you to get in touch.
         After you've gotten in touch, mark the task as done and get reminded once the interval is over again.

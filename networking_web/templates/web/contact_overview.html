@@ -7,44 +7,44 @@
 {% block content %}
     <h1 class="display-1">Contacts</h1>
     <table class="table table-sm table-hover">
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Last Interaction</th>
-        <th>Next Interaction</th>
-        <th class="text-center">Add touchpoint</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for contact in contact_list %}
-    <tr>
-        <td>
-            <a href="{% url "networking_web:contact-view" contact.id %}">{{ contact.name }}</a>
-            {% if contact.get_urgency > 0 %}
-            <span class="badge badge-primary">due</span>
-            {% endif %}
-        </td>
-        <td class="">
-            {% if contact.get_last_touchpoint %}
-            {{ contact.get_last_touchpoint.when|timesince_coarse }} ago
-            {% else %}
-            never
-            {% endif %}
-        </td>
-        <td>
-            {% if contact.get_urgency < 0 %}
-            in {{ contact.get_due_date|timeuntil_coarse }}
-            {% else %}
-            due
-            {% endif %}
-        </td>
-        <td class="text-center">
-            <a href="{% url "networking_web:add-touchpoint" contact.id %}" class="btn btn-sm btn-primary">
-                <i class="material-icons">done</i>
-            </a>
-        </td>
-    </tr>
-    {% endfor %}
-    </tbody>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Last Interaction</th>
+            <th>Next Interaction</th>
+            <th class="text-center">Add touchpoint</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for contact in contact_list %}
+            <tr>
+                <td>
+                    <a href="{% url "networking_web:contact-view" contact.id %}">{{ contact.name }}</a>
+                    {% if contact.get_urgency > 0 %}
+                        <span class="badge badge-primary">due</span>
+                    {% endif %}
+                </td>
+                <td class="">
+                    {% if contact.get_last_interaction %}
+                        {{ contact.get_last_interaction.was_at|timesince_coarse }} ago
+                    {% else %}
+                        never
+                    {% endif %}
+                </td>
+                <td>
+                    {% if contact.get_urgency < 0 %}
+                        in {{ contact.get_due_date|timeuntil_coarse }}
+                    {% else %}
+                        due
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{% url "networking_web:add-touchpoint" contact.id %}" class="btn btn-sm btn-primary">
+                        <i class="material-icons">done</i>
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
     </table>
 {% endblock %}

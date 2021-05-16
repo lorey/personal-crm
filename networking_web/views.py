@@ -80,7 +80,7 @@ def index(request):
     contacts = (
         Contact.objects.filter(user=request.user)
         .order_by("name")
-        .prefetch_related("touchpoint_set")
+        .prefetch_related("interactions")
         .all()
     )
 

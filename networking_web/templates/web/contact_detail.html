@@ -15,13 +15,17 @@
             add touchpoint
         </a>
     </h3>
-    {% if contact.touchpoint_set.all %}
+    {% if contact.interactions.all %}
         <p>These are your touchpoints:</p>
         <ul>
-            {% for touchpoint in contact.touchpoint_set.all %}
+            {% for interaction in contact.interactions.all %}
                 <li>
-                    {{ touchpoint.when|timesince }} ago
-                    ({{ touchpoint.when|date }})
+                    <strong>{{ interaction.title }}</strong><br>
+                    {{ interaction.description }}<br>
+                    <small>
+                        {{ interaction.was_at|timesince }} ago
+                        ({{ interaction.was_at|date }})
+                    </small>
                 </li>
             {% endfor %}
         </ul>
@@ -33,24 +37,25 @@
 {% block right %}
     <p>Frequency: {{ contact.frequency_in_days }} days</p>
     {% if contact.email %}
-    <p>Email:</p>
-    <ul>
-        <li>
-            <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
-        </li>
-    </ul>
+        <p>Email:</p>
+        <ul>
+            <li>
+                <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
+            </li>
+        </ul>
     {% endif %}
 
     {% if contact.phone_number %}
-    <p>Phone</p>
-    <ul>
-        <li>
-            <a href="tel:{{ contact.phone_number }}">{{ contact.phone_number }}</a>
-        </li>
-        <li>
-            <a href="https://wa.me/{{ contact.phone_number|urlencode }}?text={{ 'Hallo' }}" target="_blank">WhatsApp</a>
-        </li>
-    </ul>
+        <p>Phone</p>
+        <ul>
+            <li>
+                <a href="tel:{{ contact.phone_number }}">{{ contact.phone_number }}</a>
+            </li>
+            <li>
+                <a href="https://wa.me/{{ contact.phone_number|urlencode }}?text={{ 'Hallo' }}"
+                   target="_blank">WhatsApp</a>
+            </li>
+        </ul>
     {% endif %}
 
     <p>
