@@ -5,6 +5,10 @@ class User {
 
 class Contact {
     name
+    description
+    linkedin_url
+    twitter_url
+    phone_number
     last_interaction_on
 }
 User -- Contact
@@ -34,7 +38,7 @@ ContactPlan --> Reminder
 class Interaction {
     title
     description
-    interacted_on
+    was_at
 }
 Contact --{ Interaction
 

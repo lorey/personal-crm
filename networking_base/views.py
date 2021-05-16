@@ -2,7 +2,7 @@ import pandas as pd
 from dateutil.parser import parse
 from django.core.exceptions import MultipleObjectsReturned
 
-from networking_base.models import Contact, Touchpoint
+from networking_base.models import Contact, Interaction
 
 
 def create_contacts_from_file_handle(file, owner, col_email, col_name):
@@ -72,7 +72,9 @@ def create_contact_from_trello_card(
     last_activity = parse(last_activity_raw) if last_activity_raw else None
     if was_created and last_activity:
         # get or create to avoid duplicates on multiple imports
-        Touchpoint.objects.get_or_create(when=last_activity, contact=contact)
+        Interaction.objects.get_or_create(
+            was_at=last_activity, contact=contact, title="", description=""
+        )
 
     return contact
 

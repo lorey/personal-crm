@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.management import BaseCommand
 from pytz import UTC
 
-from networking_base.models import Contact, Touchpoint
+from networking_base.models import Contact, Interaction
 
 
 class Command(BaseCommand):
@@ -30,4 +30,9 @@ class Command(BaseCommand):
                     date_random = datetime.now(tz=UTC) - timedelta(
                         days=random.randrange(1, 365)
                     )
-                    Touchpoint.objects.create(when=date_random, contact=contact)
+                    Interaction.objects.create(
+                        was_at=date_random,
+                        contact=contact,
+                        title="Interaction",
+                        description="Talked",
+                    )

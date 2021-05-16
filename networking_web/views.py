@@ -14,7 +14,7 @@ from django.views.generic import (
 )
 from pytz import UTC
 
-from networking_base.models import Contact, Touchpoint
+from networking_base.models import Contact, Interaction
 from networking_base.views import (
     create_contacts_from_file_handle,
     create_contacts_from_trello,
@@ -101,14 +101,19 @@ def index(request):
 
 @login_required
 def settings(request):
-    return render(request, "web/settings.html")
+    return render(request, "web/settings.html", {})
 
 
 @login_required
 def add_touchpoint(request, contact_id):
     contact = Contact.objects.get(pk=contact_id)
     assert contact.user == request.user
-    Touchpoint.objects.create(when=datetime.now(tz=UTC), contact=contact)
+    Interaction.objects.create(
+        was_at=datetime.now(tz=UTC),
+        contact=contact,
+        title="Interaction",
+        description="...",
+    )
     return redirect_back(request)
 
 
