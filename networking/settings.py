@@ -138,3 +138,19 @@ SITE_ID = 1
 LOGIN_REDIRECT_URL = "networking_web:index"
 
 CRISPY_TEMPLATE_PACK = "bootstrap4"
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+            "openid",
+            "https://www.googleapis.com/auth/contacts.readonly",
+            "https://www.googleapis.com/auth/gmail.readonly",
+            "https://www.googleapis.com/auth/calendar.readonly",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "offline",
+        },
+    }
+}

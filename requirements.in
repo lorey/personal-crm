@@ -10,3 +10,8 @@ django
 django-allauth
 pandas
 django-crispy-forms
+
+# google
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
