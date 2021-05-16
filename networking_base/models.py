@@ -1,4 +1,3 @@
-import time
 from datetime import datetime, timedelta
 
 from django.contrib.auth.models import User
@@ -80,6 +79,8 @@ class EmailInteraction(Interaction):
 
 
 class CalendarInteraction(Interaction):
+    google_calendar_id = models.CharField(max_length=100)
+    url = models.URLField()
     # todo event id or something
     pass
 
