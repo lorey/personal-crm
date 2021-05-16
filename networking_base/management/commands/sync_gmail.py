@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from datetime import datetime
@@ -10,16 +11,24 @@ from django.contrib.auth.models import User
 from django.core.management import BaseCommand
 from googleapiclient.discovery import build
 
-# todo map emails to names iot create contacts
 from networking_base.models import Contact, EmailAddress, EmailInteraction
 
+# todo map emails to names iot create contacts
+# todo enable creation of interactions with many people at once
 
-def extract_email(header_str):
-    matches = re.findall(r"[A-z0-9_.+-]+@[A-z0-9_.-]+\.[A-z]+", header_str)
+REGEX_EMAIL = r"[A-z0-9_.+-]+@[A-z0-9_.-]+\.[A-z]+"
+
+
+class HeaderParsingException(Exception):
+    pass
+
+
+def extract_emails(header_str):
+    matches = re.findall(REGEX_EMAIL, header_str)
     if not matches:
-        raise RuntimeError(f"email not found: {header_str}")
+        raise HeaderParsingException(f"parsing failed: {header_str}")
 
-    return matches[0].lower()
+    return list({m.lower() for m in matches})
 
 
 class EmailDirection(Enum):
@@ -39,14 +48,20 @@ class GmailEmail:
         return {h["name"]: h["value"] for h in self._data["payload"]["headers"]}
 
     def get_to_emails(self):
-        to_raw = self.get_header_values_by_name().get("To")
-        if not to_raw:
+        to_ = self.get_header_values_by_name().get("To")
+        if not to_:
             return []
 
-        return list(map(extract_email, to_raw.split(",")))
+        return extract_emails(to_)
 
     def get_from_email(self):
-        return extract_email(self.get_header_values_by_name()["From"])
+        from_ = self.get_header_values_by_name()["From"]
+        emails = extract_emails(from_)
+        if len(emails) != 1:
+            logging.warning(
+                f'Parsing returned weird "from": {from_=} {emails=}'
+            )
+        return emails[0]
 
     def get_subject(self):
         return self.get_header_values_by_name().get("Subject")
@@ -99,6 +114,21 @@ def get_or_create_contact_email(email, user):
     return ea
 
 
+def save_interaction(gmail_email: GmailEmail, user):
+    for to_email in gmail_email.get_to_emails():
+        contact_email = get_or_create_contact_email(to_email, user)
+
+        EmailInteraction.objects.get_or_create(
+            gmail_message_id=gmail_email.get_id(),
+            contact=contact_email.contact,
+            defaults={
+                "title": gmail_email.get_subject() or "-",
+                "description": gmail_email.get_snippet() or "-",
+                "was_at": gmail_email.get_date(),
+            },
+        )
+
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         for user in User.objects.all():
@@ -108,10 +138,15 @@ class Command(BaseCommand):
 
             social_token = SocialToken.objects.get(account=social_account)
             social_app = SocialApp.objects.get(provider="google")
+
+            if not social_token.token_secret:
+                logging.warning(
+                    f"refresh token (token secret) missing for {user}, needs to re-add app"
+                )
+
             credentials = google.oauth2.credentials.Credentials(
                 social_token.token,
                 refresh_token=social_token.token_secret,
-                # todo
                 token_uri="https://oauth2.googleapis.com/token",
                 client_id=social_app.client_id,
                 client_secret=social_app.secret,
@@ -137,32 +172,18 @@ class Command(BaseCommand):
                     msg = (
                         service.users()
                         .messages()
-                        .get(userId="me", id=result["id"])
+                        .get(userId="me", id=result["id"], format="metadata")
                         .execute()
                     )
 
                     try:
                         gmail_email = GmailEmail(msg)
-                        gmail_email.print(user_emails)
-                        print()
+                        # gmail_email.print(user_emails)
 
                         if gmail_email.is_outgoing(user_emails):
-                            for to_email in gmail_email.get_to_emails():
-                                contact_email = get_or_create_contact_email(
-                                    to_email, user
-                                )
-
-                                EmailInteraction.objects.get_or_create(
-                                    gmail_message_id=gmail_email.get_id(),
-                                    contact=contact_email.contact,
-                                    defaults={
-                                        "title": gmail_email.get_subject() or "-",
-                                        "description": gmail_email.get_snippet() or "-",
-                                        "was_at": gmail_email.get_date(),
-                                    },
-                                )
-                    except RuntimeError:
-                        logging.exception("parsing failed")
+                            save_interaction(gmail_email, user)
+                    except HeaderParsingException:
+                        print(f"parsing failed for {msg['id']}")
 
                 # define next request
                 request = (
