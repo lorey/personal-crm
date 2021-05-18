@@ -30,7 +30,7 @@ class Contact(models.Model):
     def get_urgency(self):
         last_interaction_date = self.get_last_interaction_date_or_default()
         time_since_interaction = datetime.now().astimezone() - last_interaction_date
-        return time_since_interaction.days > self.frequency_in_days
+        return time_since_interaction.days - self.frequency_in_days
 
     def get_due_date(self):
         last_interaction_date = self.get_last_interaction_date_or_default()
