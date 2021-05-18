@@ -1,47 +1,47 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>{% block head_title %}{% endblock %}</title>
     {% block extra_head %}
     {% endblock %}
-  </head>
-  <body>
-    {% block body %}
+</head>
+<body>
+{% block body %}
 
     {% if messages %}
-    <div>
-      <strong>Messages:</strong>
-      <ul>
-        {% for message in messages %}
-        <li>{{message}}</li>
-        {% endfor %}
-      </ul>
-    </div>
+        <div>
+            <strong>Messages:</strong>
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
 
     <div>
-      <strong>Menu:</strong>
-      <ul>
-        <li><a href="{% url 'index' %}">Home</a></li>
-        {% if user.is_authenticated %}
-        <li><a href="{% url 'networking_web:index' %}">App</a></li>
-        <li><a href="{% url 'account_email' %}">Change E-mail</a></li>
-        <li><a href="{% url 'account_logout' %}">Sign Out</a></li>
-        {% else %}
-        <li><a href="{% url 'account_login' %}">Sign In</a></li>
-        <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
-        {% endif %}
-      </ul>
+        <strong>Menu:</strong>
+        <ul>
+            <li><a href="{% url 'networking_public:index' %}">Home</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'networking_web:index' %}">App</a></li>
+                <li><a href="{% url 'account_email' %}">Change E-mail</a></li>
+                <li><a href="{% url 'account_logout' %}">Sign Out</a></li>
+            {% else %}
+                <li><a href="{% url 'account_login' %}">Sign In</a></li>
+                <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
+            {% endif %}
+        </ul>
     </div>
     {% block content %}
     {% endblock %}
-    {% endblock %}
-    {% block extra_body %}
-    {% endblock %}
-    {% block footer %}
+{% endblock %}
+{% block extra_body %}
+{% endblock %}
+{% block footer %}
     <div style="margin-top: 50px">
         Built with &hearts; by <a href="https://karllorey.com" target="_blank">Karl Lorey</a>
     </div>
-    {% endblock %}
-  </body>
+{% endblock %}
+</body>
 </html>
