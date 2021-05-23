@@ -1,0 +1,25 @@
+{% extends '../templates/sidebar.html' %}
+{% load crispy_forms_tags %}
+
+{% block content-title %}
+    {{ object.name }}
+{% endblock %}
+
+{% block content-main %}
+    <p>
+        Do you really want to delete {{ object.name }} permanently?
+    </p>
+    <p>
+        Please note:
+        If the contact exists in one of your connected accounts (Gmail, Calendar),
+        it will be created again, but manually added details will be lost.
+    </p>
+    <form method="post">
+        {{ form|crispy }}
+        {% csrf_token %}
+        <p class="my-5">
+            <a class="btn btn-secondary" href="{% url 'networking_web:contact-view' contact.id %}">no, keep in touch</a>
+            <button type="submit" class="btn btn-danger">yes, delete</button>
+        </p>
+    </form>
+{% endblock %}

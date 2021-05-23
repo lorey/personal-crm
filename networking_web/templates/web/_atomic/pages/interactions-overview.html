@@ -1,0 +1,16 @@
+{% extends '../templates/sidebar.html' %}
+
+{% block content-title %}Interactions{% endblock %}
+{% block content-description %}
+    Your latest interactions.
+{% endblock %}
+
+{% block content-main %}
+    <div class="card p-3">
+    {% include '../organisms/interaction-table.html' with interactions=interaction_list|slice:10 %}
+    </div>
+{% endblock %}
+
+{% block content-sidebar %}
+    <a href="#" class="btn btn-primary d-block">add interaction</a>
+{% endblock %}

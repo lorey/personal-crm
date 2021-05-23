@@ -1,0 +1,21 @@
+<table class="table">
+    <tr>
+        <th>Type</th>
+        <th>Interaction</th>
+        <th>When</th>
+    </tr>
+    {% for interaction in interactions %}
+        <tr>
+            <td>{{ interaction.get_medium }}</td>
+            <td>{{ interaction.title }}<br>
+                <small>
+                    with
+                    <a href="{% url 'networking_web:contact-view' interaction.contact.id %}">
+                        {{ interaction.contact.name }}
+                    </a>
+                </small>
+            </td>
+            <td>{{ interaction.was_at|timesince }}</td>
+        </tr>
+    {% endfor %}
+</table>

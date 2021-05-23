@@ -1,0 +1,15 @@
+{% extends './_base.html' %}
+
+{% block content %}
+    <h1 class="display-3">{% block content-title %}{% endblock %}</h1>
+    <p class="text-muted">{% block content-description %}{% endblock %}</p>
+
+    <div class="row mt-5">
+        <div class="col-md-7">
+            {% block content-main %}{% endblock %}
+        </div>
+        <div class="col-md-4 offset-md-1">
+            {% block content-sidebar %}{% endblock %}
+        </div>
+    </div>
+{% endblock %}

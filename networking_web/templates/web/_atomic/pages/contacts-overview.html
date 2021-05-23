@@ -1,0 +1,18 @@
+{% extends '../templates/sidebar.html' %}
+
+{% block content-title %}Contacts{% endblock %}
+{% block content-description %}
+    All your contacts in one place.
+{% endblock %}
+
+{% block content-main %}
+    <div class="card p-3">
+        {% include '../molecules/contact-table.html' with contacts=contact_list %}
+    </div>
+{% endblock %}
+
+{% block content-sidebar %}
+    <a href="{% url 'networking_web:contact-create' %}" class="btn btn-primary d-block">
+        add contact
+    </a>
+{% endblock %}

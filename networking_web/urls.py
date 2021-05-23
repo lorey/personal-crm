@@ -6,6 +6,12 @@ app_name = "networking_web"
 
 urlpatterns = [
     path("", views.index, name="index"),
+    # interactions
+    path(
+        "interactions",
+        views.InteractionListView.as_view(),
+        name="interactions-overview",
+    ),
     # contacts
     path("contacts", views.ContactListView.as_view(), name="contact-overview"),
     path("contacts/create", views.ContactCreateView.as_view(), name="contact-create"),
@@ -25,13 +31,4 @@ urlpatterns = [
         views.add_touchpoint,
         name="add-touchpoint",
     ),
-    path(
-        "contacts/<int:contact_id>/change-frequency/<str:method>",
-        views.change_frequency,
-        name="change-frequency",
-    ),
-    # settings
-    path("settings", views.settings, name="settings"),
-    path("import/csv", views.import_csv_start, name="import-csv"),
-    path("import/trello", views.import_trello_start, name="import-trello"),
 ]

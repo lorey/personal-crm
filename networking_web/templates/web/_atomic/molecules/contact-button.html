@@ -1,0 +1,15 @@
+<a href="{% url 'networking_web:contact-view' contact.id %}" class="btn d-block btn-secondary mb-2">
+    <div class="row">
+        <div class="col-sm-2">
+            {% load profile %}
+            <img src="{% profile_picture_url contact %}"
+                 class="img rounded-circle float-end" style="height: 25px; width: 25px">
+        </div>
+        <div class="col-sm-8 text-start">
+            {{ contact.name }}
+        </div>
+        <div class="col-sm-2">
+            {{ contact.interactions.count }}
+        </div>
+    </div>
+</a>
