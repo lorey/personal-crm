@@ -18,6 +18,7 @@ from networking_base.models import (
     Contact,
     ContactStatus,
     Interaction,
+    get_due_contacts,
     get_frequent_contacts,
     get_recent_contacts,
 )
@@ -120,18 +121,11 @@ class InteractionListView(ListView):
 
 @login_required
 def index(request):
-    contacts = (
-        Contact.objects.filter(user=request.user)
-        .order_by("name")
-        .prefetch_related("interactions")
-        .all()
-    )
-
     user = request.user
+    contacts = get_due_contacts(user)
     contacts_frequent = get_frequent_contacts(user)
     contacts_recent = get_recent_contacts(user)
 
-    contacts = sorted(contacts, key=lambda c: c.get_urgency(), reverse=True)
     return render(
         request,
         "web/_atomic/pages/dashboard.html",

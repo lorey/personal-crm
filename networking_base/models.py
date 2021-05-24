@@ -135,3 +135,20 @@ def get_frequent_contacts(user, limit=5) -> typing.List[Contact]:
         .order_by("-count")[:limit]
     )
     return list(contacts_frequent)
+
+
+def get_due_contacts(user) -> typing.List[Contact]:
+    """
+    Fetch due contacts and sort by urgency (desc).
+    :param user: user
+    :return: due contacts
+    """
+    contacts = (
+        Contact.objects.filter(user=user)
+        .order_by("name")
+        .prefetch_related("interactions")
+        .all()
+    )
+    contacts = filter(lambda c: c.get_urgency() > 0, contacts)
+    contacts = sorted(contacts, key=lambda c: c.get_urgency(), reverse=True)
+    return list(contacts)
