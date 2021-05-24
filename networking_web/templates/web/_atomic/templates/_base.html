@@ -30,7 +30,6 @@
             </a>
 
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                <li><a href="{% url 'networking_web:index' %}" class="nav-link px-3 link-secondary">Dashboard</a></li>
                 <li><a href="{% url 'networking_web:contact-overview' %}" class="nav-link px-3 link-secondary">Contacts</a></li>
                 <li><a href="{% url 'networking_web:interactions-overview' %}" class="nav-link px-3 link-secondary">Interactions</a></li>
             </ul>
@@ -47,7 +46,8 @@
                     <img src="https://github.com/lorey.png" alt="mdo" class="rounded-circle" width="32" height="32">
                 </a>
                 <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
-                    <li><a class="dropdown-item" href="{% url 'networking_web:contact-create' %}">create contact</a></li>
+                    <li><a class="dropdown-item" href="{% url 'socialaccount_connections' %}">your integrations</a></li>
+                    <li><a class="dropdown-item" href="{% url 'account_email' %}">your emails</a></li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>
