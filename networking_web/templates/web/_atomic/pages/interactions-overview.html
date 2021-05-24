@@ -6,9 +6,7 @@
 {% endblock %}
 
 {% block content-main %}
-    <div class="card p-3">
-    {% include '../organisms/interaction-table.html' with interactions=interaction_list|slice:10 %}
-    </div>
+    {% include '../organisms/interaction-list.html' with interactions=interaction_list|slice:10 %}
 {% endblock %}
 
 {% block content-sidebar %}

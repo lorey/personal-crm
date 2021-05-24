@@ -10,23 +10,7 @@
     <p class="text-muted">These are the last interactions you had with {{ contact.name }}, including meetings, calls,
         and emails.</p>
 
-    {% for interaction in contact.interactions.all %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">
-                    Interaction: {{ interaction.title }}
-                </h5>
-                <p class="text-muted">
-                    {{ interaction.description }}
-                </p>
-                <p>
-                    <small>
-                        {{ interaction.was_at|date }}, {{ interaction.was_at|timesince }} ago
-                    </small>
-                </p>
-            </div>
-        </div>
-    {% endfor %}
+    {% include '../organisms/interaction-list.html' with interactions=contact.interactions.all show_description=True %}
 {% endblock %}
 
 {% block content-sidebar %}
