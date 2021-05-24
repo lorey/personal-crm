@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
@@ -13,7 +14,7 @@ from django.views.generic import (
 )
 from pytz import UTC
 
-from networking_base.models import Contact, Interaction
+from networking_base.models import Contact, ContactStatus, Interaction
 
 CONTACT_FIELDS_DEFAULT = [
     "name",
@@ -29,6 +30,37 @@ class ContactListView(ListView):
     model = Contact
     template_name = "web/_atomic/pages/contacts-overview.html"
     ordering = "name"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        contacts = context["contact_list"]
+        contacts_by_status = defaultdict(list)
+        for contact in contacts:
+            contacts_by_status[contact.get_status()].append(contact)
+
+        # add counts
+        contact_counts = {
+            "all": len(contacts),
+            "out_of_touch": len(contacts_by_status.get(ContactStatus.OUT_OF_TOUCH, [])),
+            "in_touch": len(contacts_by_status.get(ContactStatus.IN_TOUCH, [])),
+            "hidden": len(contacts_by_status.get(ContactStatus.HIDDEN, [])),
+        }
+        context.update({k + "_count": v for k, v in contact_counts.items()})
+
+        # filter status
+        status = None
+        status_raw = self.request.GET.get("status", None)
+        if status_raw:
+            # get status enum
+            status = ContactStatus(int(self.request.GET.get("status")))
+
+            # re-filter contacts
+            context["contact_list"] = list(
+                filter(lambda c: c.get_status() == status, contacts)
+            )
+
+        return context
 
 
 class ContactDetailView(DetailView):

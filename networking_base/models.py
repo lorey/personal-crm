@@ -1,9 +1,16 @@
 from datetime import datetime, timedelta
+from enum import Enum
 
 from django.contrib.auth.models import User
 from django.db import models
 
 LAST_INTERACTION_DEFAULT = datetime.now().astimezone() - timedelta(days=365)
+
+
+class ContactStatus(Enum):
+    HIDDEN = -1
+    IN_TOUCH = 1
+    OUT_OF_TOUCH = 2
 
 
 class Contact(models.Model):
@@ -35,6 +42,11 @@ class Contact(models.Model):
     def get_due_date(self):
         last_interaction_date = self.get_last_interaction_date_or_default()
         return last_interaction_date + timedelta(days=self.frequency_in_days)
+
+    def get_status(self):
+        if self.get_urgency() > 0:
+            return ContactStatus.OUT_OF_TOUCH
+        return ContactStatus.IN_TOUCH
 
     def __str__(self):
         return self.name
