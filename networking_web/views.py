@@ -14,7 +14,13 @@ from django.views.generic import (
 )
 from pytz import UTC
 
-from networking_base.models import Contact, ContactStatus, Interaction
+from networking_base.models import (
+    Contact,
+    ContactStatus,
+    Interaction,
+    get_frequent_contacts,
+    get_recent_contacts,
+)
 
 CONTACT_FIELDS_DEFAULT = [
     "name",
@@ -67,6 +73,11 @@ class ContactDetailView(DetailView):
     model = Contact
     template_name = "web/_atomic/pages/contacts-detail.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["interactions"] = context["object"].interactions.order_by("-was_at")
+        return context
+
 
 class ContactUpdateView(UpdateView):
     model = Contact
@@ -116,11 +127,19 @@ def index(request):
         .all()
     )
 
+    user = request.user
+    contacts_frequent = get_frequent_contacts(user)
+    contacts_recent = get_recent_contacts(user)
+
     contacts = sorted(contacts, key=lambda c: c.get_urgency(), reverse=True)
     return render(
         request,
         "web/_atomic/pages/dashboard.html",
-        {"contacts": list(contacts)},
+        {
+            "contacts": list(contacts),
+            "contacts_frequent": contacts_frequent,
+            "contacts_recent": contacts_recent,
+        },
     )
 
 

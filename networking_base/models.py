@@ -1,8 +1,10 @@
+import typing
 from datetime import datetime, timedelta
 from enum import Enum
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Count
 
 LAST_INTERACTION_DEFAULT = datetime.now().astimezone() - timedelta(days=365)
 
@@ -100,3 +102,36 @@ class Reminder(models.Model):
 
     due_on = models.DateField()
     skipped_at = models.DateTimeField()
+
+
+def get_recent_contacts(user, limit=5, timespan_days=14) -> typing.List[Contact]:
+    """
+    Fetch contacts recently interacted with.
+    :param user: user
+    :param limit: limit
+    :param timespan_days: definition of recent in days
+    :return: recent contacts
+    """
+    timespan_recent = datetime.now().astimezone() - timedelta(days=timespan_days)
+    contacts_recent = (
+        Contact.objects.filter(interactions__was_at__gt=timespan_recent)
+        .filter(user=user)
+        .annotate(count=Count("interactions"))
+        .order_by("-count")[:limit]
+    )
+    return list(contacts_recent)
+
+
+def get_frequent_contacts(user, limit=5) -> typing.List[Contact]:
+    """
+    Fetch contacts with frequent interactions.
+    :param user: user
+    :param limit: limit
+    :return: frequent contacts
+    """
+    contacts_frequent = (
+        Contact.objects.filter(user=user)
+        .annotate(count=Count("interactions"))
+        .order_by("-count")[:limit]
+    )
+    return list(contacts_frequent)

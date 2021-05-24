@@ -7,18 +7,21 @@
 
 {% block content-main %}
     <h2>Due Contacts</h2>
-    <p class="text-secondary">These are the contacts you might want to contact again as you seem to be getting out of touch.</p>
+    <p class="text-secondary mb-3">
+        These are the contacts you might want to contact again as you seem to be getting out of touch.
+        If this is wrong, you might add an interaction that hasn't been covered yet.
+    </p>
     {% include '../organisms/contact-list.html' with contacts=contacts %}
 
     <h2>Upcoming</h2>
 {% endblock %}
 
 {% block content-sidebar %}
-    <h3>Frequent Contacts</h3>
-    <p class="text-muted">Your contacts by most interactions</p>
-    {% include '../organisms/contact-list-small.html' with contacts=contacts|slice:3 %}
+    <h3>Top Contacts</h3>
+    <p class="text-muted">Contacts with most interactions</p>
+    {% include '../organisms/contact-list-small.html' with contacts=contacts_frequent %}
 
     <h3 class="mt-5">Recent Contacts</h3>
     <p class="text-muted">Contacts you've interacted with recently</p>
-    {% include '../organisms/contact-list-small.html' with contacts=contacts|slice:3 %}
+    {% include '../organisms/contact-list-small.html' with contacts=contacts_recent %}
 {% endblock %}

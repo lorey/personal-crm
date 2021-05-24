@@ -10,7 +10,7 @@
     <p class="text-muted">These are the last interactions you had with {{ contact.name }}, including meetings, calls,
         and emails.</p>
 
-    {% include '../organisms/interaction-list.html' with interactions=contact.interactions.all show_description=True %}
+    {% include '../organisms/interaction-list.html' with interactions=interactions|slice:5 show_description=True %}
 {% endblock %}
 
 {% block content-sidebar %}
