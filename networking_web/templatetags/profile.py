@@ -9,7 +9,14 @@ register = template.Library()
 @register.simple_tag
 def profile_picture_url(contact, size=50):
     # defaults: http://en.gravatar.com/site/implement/images/
-    email = contact.emails.first().email
+    email_o = contact.emails.first()
+    if email_o:
+        email = email_o.email
+    else:
+        # use contact id instead of email for hashing
+        # -> results in consistent hashes and thus images
+        email = str(contact.id)
+
     gravatar_url = (
         "https://www.gravatar.com/avatar/"
         + hashlib.md5(email.lower().encode()).hexdigest()
