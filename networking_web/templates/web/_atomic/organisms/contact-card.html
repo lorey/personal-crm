@@ -13,22 +13,31 @@
                     {{ contact.name }}
                 </a>
             </p>
-            <p class="mt-0">{{ contact.description|default:'-' }}</p>
-            <div class="row text-center">
+            {% if contact.description %}
+                <p class="mt-0">{{ contact.description }}</p>
+            {% endif %}
+
+            <div class="row text-center mt-3">
                 <div class="col-sm-4">
-                    <small>Last Interaction</small><br>
+                    <small class="text-uppercase text-muted">
+                        Last Interaction
+                    </small><br>
                     <div class="badge bg-light text-dark d-block">
-                        {{ contact.get_last_interaction.was_at|timesince }} ago
+                        {% if contact.get_last_interaction %}
+                            {{ contact.get_last_interaction.was_at|timesince }} ago
+                        {% else %}
+                            -
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-4">
-                    <small>Frequency</small>
+                    <small class="text-uppercase text-muted">Frequency</small>
                     <div class="badge bg-light text-dark d-block">
                         normal
                     </div>
                 </div>
                 <div class="col-sm-4">
-                    <small>Status</small>
+                    <small class="text-uppercase text-muted">Status</small>
                     {% include '../atoms/contact-status-badge.html' %}
                 </div>
             </div>
