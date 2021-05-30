@@ -8,7 +8,7 @@ appdirs==1.4.4
     # via black
 asgiref==3.3.4
     # via django
-astroid==2.5.6
+astroid==2.5.7
     # via pylint
 black==21.5b1
     # via -r requirements.in
@@ -20,7 +20,7 @@ cffi==1.14.5
     # via cryptography
 chardet==4.0.0
     # via requests
-click==8.0.0
+click==8.0.1
     # via
     #   black
     #   pip-tools
@@ -38,9 +38,9 @@ django==3.2.3
     #   django-allauth
 flake8==3.9.2
     # via -r requirements.in
-google-api-core==1.26.3
+google-api-core==1.28.0
     # via google-api-python-client
-google-api-python-client==2.4.0
+google-api-python-client==2.6.0
     # via -r requirements.in
 google-auth-httplib2==0.1.0
     # via
@@ -48,7 +48,7 @@ google-auth-httplib2==0.1.0
     #   google-api-python-client
 google-auth-oauthlib==0.4.4
     # via -r requirements.in
-google-auth==1.30.0
+google-auth==1.30.1
     # via
     #   google-api-core
     #   google-api-python-client
@@ -88,7 +88,7 @@ pep517==0.10.0
     # via pip-tools
 pip-tools==6.1.0
     # via -r requirements.in
-protobuf==3.17.0
+protobuf==3.17.1
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -151,7 +151,7 @@ toml==0.10.2
     #   pylint
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.26.4
+urllib3==1.26.5
     # via requests
 wrapt==1.12.1
     # via astroid
