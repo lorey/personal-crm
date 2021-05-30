@@ -1,15 +1,19 @@
 @startuml
+
 class User {
     id
 }
+
+class SocialAccount
+User -- SocialAccount
 
 class Contact {
     name
     description
     linkedin_url
     twitter_url
-    phone_number
     last_interaction_on
+    frequency_in_days
 }
 User -- Contact
 
@@ -23,24 +27,11 @@ class PhoneNumber {
 }
 Contact --{ PhoneNumber
 
-class ContactPlan {
-    frequency
-}
-Contact - ContactPlan
-
 class Reminder {
     due
     skipped_on
 }
 Contact --{ Reminder
-ContactPlan --> Reminder
-
-class Interaction {
-    title
-    description
-    was_at
-}
-Contact --{ Interaction
 
 enum InteractionType {
     Personal
@@ -48,16 +39,89 @@ enum InteractionType {
     Voice
     Text
 }
+
+class Interaction {
+    title
+    description
+    was_at
+    url
+    medium: [Email, Calendar, Phone]
+}
+Contact }-{ Interaction
 InteractionType -- Interaction
 
+class Message {}
+Interaction -- Message
+
 class EmailInteraction {
-    gmail_message_id
+    subject
+    snippet
 }
-Interaction <|-- EmailInteraction
+Interaction <-- EmailInteraction
 EmailAddress -- EmailInteraction
 
-class CalendarInteraction {}
-Interaction <|-- CalendarInteraction
+class CalendarInteraction {
+    title
+    description
+}
+Interaction <-- CalendarInteraction
 EmailAddress -- CalendarInteraction
+
+package Linkedin {
+    class LinkedinExport {}
+
+    class LinkedinExportMessage {
+        thread_id
+        profile_url
+    }
+    LinkedinExport <-- LinkedinExportMessage
+
+    class LinkedinExportConnection {}
+    LinkedinExport <-- LinkedinExportConnection
+
+    class LinkedinMessage {
+    }
+    LinkedinMessage <-- LinkedinExportMessage
+    Message <-- LinkedinMessage
+
+}
+
+class PhoneCall {
+    length
+}
+Interaction <-- PhoneCall
+PhoneNumber --{ PhoneCall
+
+class ManualInteraction {
+    title
+    description
+    was_at
+    url
+    type
+}
+Interaction <-- ManualInteraction
+
+package Google {
+    class GoogleEmail {
+        email_interaction_id
+        --- external ---
+        id
+        header_from
+        header_to
+        snippet
+        ...
+    }
+    EmailInteraction -- GoogleEmail
+
+    class GoogleCalendarEvent {
+        --- external ---
+        id
+        data: json
+    }
+    CalendarInteraction -- GoogleCalendarEvent
+
+    SocialAccount -- GoogleCalendarEvent
+    SocialAccount -- GoogleEmail
+}
 
 @enduml

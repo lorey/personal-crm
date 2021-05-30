@@ -2,13 +2,18 @@
     <div class="row">
         <div class="col-md-4 mt-1">
             <div class="text-muted small text-uppercase">
-                Contact
+                Contact(s)
             </div>
             <div>
-                <a href="{% url 'networking_web:contact-view' interaction.contact.id %}"
-                   class="text-decoration-none">
-                    {{ interaction.contact }}
-                </a>
+                {% for contact in interaction.contacts.all|slice:3 %}
+                    <a href="{% url 'networking_web:contact-view' contact.id %}"
+                       class="text-decoration-none">
+                        {{ contact.name }}
+                    </a><br>
+                {% endfor %}
+                {% if interaction.contacts.all|length > 3 %}
+                    and {{ interaction.contacts.all|slice:'3:'|length }} others...
+                {% endif %}
             </div>
         </div>
         <div class="col-md-4 mt-1">

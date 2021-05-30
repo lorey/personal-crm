@@ -118,6 +118,10 @@ class InteractionListView(ListView):
     template_name = "web/_atomic/pages/interactions-overview.html"
     ordering = "-was_at"
 
+    def get_queryset(self):
+        # return past interactions only as future ones don't match the view
+        return Interaction.objects.filter(was_at__lt=datetime.now().astimezone())
+
 
 @login_required
 def index(request):
@@ -130,7 +134,7 @@ def index(request):
         request,
         "web/_atomic/pages/dashboard.html",
         {
-            "contacts": list(contacts),
+            "contacts": contacts,
             "contacts_frequent": contacts_frequent,
             "contacts_recent": contacts_recent,
         },

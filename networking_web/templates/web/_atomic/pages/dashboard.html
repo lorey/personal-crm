@@ -11,7 +11,14 @@
         These are the contacts you might want to contact again as you seem to be getting out of touch.
         If this is wrong, you might add an interaction that hasn't been covered yet.
     </p>
-    {% include '../organisms/contact-list.html' with contacts=contacts %}
+    {% if contacts %}
+        {% include '../organisms/contact-list.html' with contacts=contacts %}
+    {% else %}
+        <div class="alert alert-success">
+            <strong>Inbox Zero</strong><br>
+            You're in touch with all of your contacts, congratulations! 🎉
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block content-sidebar %}

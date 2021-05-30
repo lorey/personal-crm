@@ -9,7 +9,9 @@ register = template.Library()
 @register.simple_tag
 def profile_picture_url(contact, size=50):
     # defaults: http://en.gravatar.com/site/implement/images/
-    email_o = contact.emails.first()
+
+    # todo chose primary email or email with image tag
+    email_o = contact.email_addresses.first()
     if email_o:
         email = email_o.email
     else:

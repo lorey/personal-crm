@@ -1,6 +1,7 @@
 import logging
 import re
-from datetime import datetime
+import typing
+from datetime import date, datetime
 from enum import Enum
 
 import google.oauth2.credentials
@@ -11,16 +12,16 @@ from django.core.management import BaseCommand
 from googleapiclient.discovery import build
 
 from networking_base.models import (
-    CalendarInteraction,
-    Contact,
-    EmailAddress,
-    EmailInteraction,
+    GoogleCalendarEvent,
+    GoogleEmail,
+    Interaction,
+    get_or_create_contact_email,
 )
 
-# todo map emails to names iot create contacts
-# todo enable creation of interactions with many people at once
+# todo map emails to names in order to create contacts
 
 REGEX_EMAIL = r"[A-z0-9_.+-]+@[A-z0-9_.-]+\.[A-z]+"
+EMAIL_TITLE_DEFAULT = "Email without subject"
 
 
 class HeaderParsingException(Exception):
@@ -41,7 +42,11 @@ class EmailDirection(Enum):
     UNKNOWN = None
 
 
-class GmailEmail:
+class GmailEmailAdapter:
+    """
+    Representation of a gmail email.
+    """
+
     def __init__(self, data):
         self._data = data
 
@@ -105,33 +110,12 @@ class GmailEmail:
         print(f"on: {self.get_date()}")
 
 
-def get_or_create_contact_email(email, user):
-    email_clean = email.lower()
-    ea = EmailAddress.objects.filter(email=email_clean, contact__user=user).first()
-    if not ea:
-        # email does not exist
-        # -> create contact (dummy) and email
-        contact = Contact.objects.create(user=user, name=email, frequency_in_days=365)
-        ea = EmailAddress.objects.create(email=email_clean, contact=contact)
-    return ea
+class GoogleCalendarEventStatus(Enum):
+    CONFIRMED = "confirmed"
+    CANCELLED = "cancelled"
 
 
-def save_interaction(gmail_email: GmailEmail, user):
-    for to_email in gmail_email.get_to_emails():
-        contact_email = get_or_create_contact_email(to_email, user)
-
-        EmailInteraction.objects.get_or_create(
-            gmail_message_id=gmail_email.get_id(),
-            contact=contact_email.contact,
-            defaults={
-                "title": gmail_email.get_subject() or "-",
-                "description": gmail_email.get_snippet() or "-",
-                "was_at": gmail_email.get_date(),
-            },
-        )
-
-
-class GoogleCalendarEvent:
+class GoogleCalendarEventAdapter:
     def __init__(self, data):
         assert data["kind"] == "calendar#event"
         self._data = data
@@ -139,9 +123,9 @@ class GoogleCalendarEvent:
     def get_id(self) -> str:
         return self._data["id"]
 
-    def get_status(self) -> str:
+    def get_status(self) -> GoogleCalendarEventStatus:
         """If the event is confirmed."""
-        return self._data["status"]
+        return GoogleCalendarEventStatus(self._data["status"])
 
     def get_url(self):
         return self._data["htmlLink"]
@@ -155,10 +139,10 @@ class GoogleCalendarEvent:
     def get_end(self):
         return self._get_date_or_datetime(self._data["end"])
 
-    def _get_date_or_datetime(self, data):
+    def _get_date_or_datetime(self, data) -> typing.Union[datetime, date]:
         if "dateTime" in data:
             return datetime.strptime(data["dateTime"], "%Y-%m-%dT%H:%M:%S%z")
-        return datetime.strptime(data["date"], "%Y-%m-%d")
+        return datetime.strptime(data["date"], "%Y-%m-%d").date()
 
     def print(self):
         print(self.get_url())
@@ -173,11 +157,36 @@ class GoogleCalendarEvent:
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+        # fetch calendar and gmail for all users
         for user in User.objects.all():
+            self.stdout.write(f"syncing {user}")
             social_account = SocialAccount.objects.get(user=user)
 
+            self.stdout.write("- syncing calendar")
             sync_calendar(social_account)
+
+            self.stdout.write("- syncing gmail")
             sync_gmail(social_account)
+
+            # create interactions for all emails
+            self.stdout.write(f"- creating interactions for {user}")
+            google_emails = GoogleEmail.objects.filter(
+                social_account=social_account
+            ).all()
+            for google_email in google_emails:
+                if not google_email.interaction:
+                    try:
+                        create_email_interaction(google_email)
+                    except HeaderParsingException:
+                        logging.exception("parsing email failed")
+
+            # create interactions for all calendar events
+            google_events = GoogleCalendarEvent.objects.filter(
+                social_account=social_account
+            ).all()
+            for google_event in google_events:
+                if not google_event.interaction:
+                    update_calendar_interaction(google_event)
 
 
 def sync_calendar(social_account):
@@ -202,39 +211,14 @@ def sync_calendar(social_account):
     while request:
         response = request.execute()
         for item in response["items"]:
-            gcal = GoogleCalendarEvent(item)
-
-            # don't include cancelled events as they can contain close to nothing
-            if gcal.get_status() == "confirmed":
-                attendee_emails = []
-                was_present = False
-                for attendee in gcal.get_attendees():
-                    if (
-                        not attendee.get("self", False)
-                        and attendee["responseStatus"] == "accepted"
-                    ):
-                        contact_email = get_or_create_contact_email(
-                            attendee["email"], social_account.user
-                        )
-                        attendee_emails.append(contact_email)
-                    elif not was_present:
-                        was_present = (
-                            attendee.get("self", False)
-                            and attendee["responseStatus"] == "accepted"
-                        )
-
-                if was_present:
-                    for attendee_email in attendee_emails:
-                        CalendarInteraction.objects.get_or_create(
-                            google_calendar_id=gcal.get_id(),
-                            contact=attendee_email.contact,
-                            defaults={
-                                "title": gcal.get_summary(),
-                                "description": "imported from Google Calendar",
-                                "url": gcal.get_url(),
-                                "was_at": gcal.get_end(),
-                            },
-                        )
+            gcal_event, was_created = GoogleCalendarEvent.objects.get_or_create(
+                google_calendar_id=item["id"],
+                defaults={"data": item, "social_account": social_account},
+            )
+            if not was_created:
+                # calendar events can change, so needs to be updated
+                gcal_event.data = item
+                gcal_event.save()
 
         # define next request
         request = service.events().list_next(
@@ -243,9 +227,6 @@ def sync_calendar(social_account):
 
 
 def sync_gmail(social_account):
-    user_email = social_account.extra_data["email"].lower()
-    user_emails = [user_email]
-
     social_token = SocialToken.objects.get(account=social_account)
     social_app = SocialApp.objects.get(provider="google")
 
@@ -263,7 +244,7 @@ def sync_gmail(social_account):
     )
     service = build("gmail", "v1", credentials=credentials)
 
-    request = service.users().messages().list(userId="me")
+    request = service.users().messages().list(userId="me", maxResults=5000)
     while request:
         token_old = credentials.token
         response = request.execute()
@@ -276,24 +257,19 @@ def sync_gmail(social_account):
             social_token.save()
             logging.warning("credentials changed: updated")
 
-        # print(response, "\n")
-
         for result in response["messages"]:
-            msg = (
-                service.users()
-                .messages()
-                .get(userId="me", id=result["id"], format="metadata")
-                .execute()
-            )
+            if GoogleEmail.objects.filter(gmail_message_id=result["id"]).count() == 0:
+                msg = (
+                    service.users()
+                    .messages()
+                    .get(userId="me", id=result["id"], format="metadata")
+                    .execute()
+                )
 
-            try:
-                gmail_email = GmailEmail(msg)
-                # gmail_email.print(user_emails)
-
-                if gmail_email.is_outgoing(user_emails):
-                    save_interaction(gmail_email, social_account.user)
-            except HeaderParsingException:
-                print(f"parsing failed for {msg['id']}")
+                GoogleEmail.objects.get_or_create(
+                    gmail_message_id=msg["id"],
+                    defaults={"data": msg, "social_account": social_account},
+                )
 
         # define next request
         request = (
@@ -301,3 +277,77 @@ def sync_gmail(social_account):
             .messages()
             .list_next(previous_request=request, previous_response=response)
         )
+
+
+def create_email_interaction(google_email: GoogleEmail):
+    user = google_email.social_account.user
+
+    # make data accessible
+    google_email_adapter = GmailEmailAdapter(google_email.data)
+
+    # create interaction
+    interaction = Interaction.objects.create(
+        title=google_email_adapter.get_subject() or EMAIL_TITLE_DEFAULT,
+        description=google_email_adapter.get_snippet(),
+        was_at=google_email_adapter.get_date(),
+        type_id=None,
+        user=user,
+    )
+
+    # remeber created interaction
+    google_email.interaction = interaction
+    google_email.save()
+
+    # connect contacts
+    emails_raw = set(google_email_adapter.get_to_emails()) | {
+        google_email_adapter.get_from_email()
+    }
+    email_addresses = [get_or_create_contact_email(email, user) for email in emails_raw]
+    interaction.contacts.set({ea.contact for ea in email_addresses})
+
+
+def update_calendar_interaction(event: GoogleCalendarEvent):
+    """
+    Takes a google calendar event and creates/updates/deletes the corresponding interaction.
+    :param event: calendar event
+    """
+    user = event.social_account.user
+
+    event_adapter = GoogleCalendarEventAdapter(event.data)
+
+    needs_interaction = (
+        # event must be confirmed
+        event_adapter.get_status() == GoogleCalendarEventStatus.CONFIRMED
+        # event has attendees
+        and event_adapter.get_attendees()
+    )
+
+    if needs_interaction:
+        # create interaction
+        interaction = event.interaction
+        if not interaction:
+            interaction = Interaction()
+
+        # update interaction
+        interaction.title = event_adapter.get_summary()
+        interaction.description = "Google Calendar Event"
+        interaction.was_at = event_adapter.get_end().astimezone()
+        interaction.type_id = None
+        interaction.user = user
+        interaction.save()
+
+        # remember interaction in event
+        event.interaction = interaction
+        event.save()
+
+        # connect all invitees
+        emails_raw = {attendee["email"] for attendee in event_adapter.get_attendees()}
+        email_addresses = [
+            get_or_create_contact_email(email, user) for email in emails_raw
+        ]
+        interaction.contacts.set({ea.contact for ea in email_addresses})
+    else:
+        # no interaction object desired:
+        # delete the interaction if it still exists
+        if event.interaction:
+            event.interaction.delete()

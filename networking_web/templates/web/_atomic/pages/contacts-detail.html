@@ -19,10 +19,10 @@
         <a href="{% url 'networking_web:contact-delete' contact.id %}" class="btn btn-secondary d-block">delete</a>
     </p>
 
-    <h3>Connected Emails</h3>
+    <h3 class="mt-3">Email Addresses</h3>
     <p class="text-muted">These emails are connected to {{ contact.name }}'s account</p>
     <ul>
-        {% for email in contact.emails.all %}
+        {% for email in contact.email_addresses.all %}
             <li>
                 <a href="mailto:{{ email.email }}">
                     {{ email.email }}
@@ -31,6 +31,20 @@
         {% endfor %}
     </ul>
 
-    <h3 class="mt-5">Potential duplicates</h3>
+    <h3 class="mt-3">Phone Numbers</h3>
+    <p class="text-muted">These phone numbers are connected to {{ contact.name }}'s account</p>
+    <ul>
+        {% for phone_no in contact.phone_numbers.all %}
+            <li>
+                <a href="tel:{{ phone_no.phone_number }}">
+                    {{ phone_no.phone_number }}
+                </a>
+            </li>
+        {% empty %}
+            <li>no phone numbers</li>
+        {% endfor %}
+    </ul>
+
+    <h3 class="mt-3">Potential duplicates</h3>
     <p>no duplicates</p>
 {% endblock %}
