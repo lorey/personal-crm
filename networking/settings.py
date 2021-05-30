@@ -154,3 +154,8 @@ SOCIALACCOUNT_PROVIDERS = {
         },
     }
 }
+
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_FORMS = {
+    "add_email": "networking_base.forms.AddEmailFormRespectingVerification"
+}
