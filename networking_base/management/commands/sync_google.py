@@ -174,11 +174,10 @@ class Command(BaseCommand):
                 social_account=social_account
             ).all()
             for google_email in google_emails:
-                if not google_email.interaction:
-                    try:
-                        create_email_interaction(google_email)
-                    except HeaderParsingException:
-                        logging.exception("parsing email failed")
+                try:
+                    update_email_interaction(google_email)
+                except HeaderParsingException:
+                    logging.exception("parsing email failed")
 
             # create interactions for all calendar events
             google_events = GoogleCalendarEvent.objects.filter(
@@ -279,20 +278,23 @@ def sync_gmail(social_account):
         )
 
 
-def create_email_interaction(google_email: GoogleEmail):
+def update_email_interaction(google_email: GoogleEmail):
     user = google_email.social_account.user
 
     # make data accessible
     google_email_adapter = GmailEmailAdapter(google_email.data)
 
     # create interaction
-    interaction = Interaction.objects.create(
-        title=google_email_adapter.get_subject() or EMAIL_TITLE_DEFAULT,
-        description=google_email_adapter.get_snippet(),
-        was_at=google_email_adapter.get_date(),
-        type_id=None,
-        user=user,
-    )
+    interaction = google_email.interaction
+    if not interaction:
+        interaction = Interaction()
+
+    interaction.title = google_email_adapter.get_subject() or EMAIL_TITLE_DEFAULT
+    interaction.description = google_email_adapter.get_snippet()
+    interaction.was_at = google_email_adapter.get_date()
+    interaction.type_id = None
+    interaction.user = user
+    interaction.save()
 
     # remeber created interaction
     google_email.interaction = interaction
