@@ -6,6 +6,7 @@ from enum import Enum
 
 import google.oauth2.credentials
 import pytz
+from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
 from django.contrib.auth.models import User
 from django.core.management import BaseCommand
@@ -15,6 +16,7 @@ from networking_base.models import (
     GoogleCalendarEvent,
     GoogleEmail,
     Interaction,
+    clean_email,
     get_or_create_contact_email,
 )
 
@@ -33,7 +35,7 @@ def extract_emails(header_str):
     if not matches:
         raise HeaderParsingException(f"parsing failed: {header_str}")
 
-    return list({m.lower() for m in matches})
+    return list({clean_email(m) for m in matches})
 
 
 class EmailDirection(Enum):
@@ -167,30 +169,42 @@ class Command(BaseCommand):
 class GoogleUserSync:
     def __init__(self, user):
         self.user = user
-        self.social_account = SocialAccount.objects.get(user=user, provider="google")
+        self.social_account = None
+
+        self.user_emails = {
+            clean_email(sa_email_address.email)
+            for sa_email_address in EmailAddress.objects.filter(user=self.user).all()
+        }
 
     def sync(self):
+        # get social account
+        self.social_account = SocialAccount.objects.get(
+            user=self.user, provider="google"
+        )
+
         self.sync_calendar()
         self.sync_gmail()
         self.update_interactions()
 
     def update_interactions(self):
+        # updates need to be performed each time as mapped contacts could have changed
+
+        # update emails
         google_emails = GoogleEmail.objects.filter(
             social_account=self.social_account
         ).all()
         for google_email in google_emails:
             try:
-                update_email_interaction(google_email)
+                update_email_interaction(google_email, self.user_emails)
             except HeaderParsingException:
                 logging.exception("parsing email failed")
 
-        # create interactions for all calendar events
+        # update interactions for all calendar events
         google_events = GoogleCalendarEvent.objects.filter(
             social_account=self.social_account
         ).all()
         for google_event in google_events:
-            if not google_event.interaction:
-                update_calendar_interaction(google_event)
+            update_calendar_interaction(google_event, self.user_emails)
 
     def sync_calendar(self):
         social_token = SocialToken.objects.get(account=self.social_account)
@@ -273,7 +287,9 @@ class GoogleUserSync:
             )
 
 
-def update_email_interaction(google_email: GoogleEmail) -> Interaction:
+def update_email_interaction(
+    google_email: GoogleEmail, ignore_emails=()
+) -> Interaction:
     user = google_email.social_account.user
 
     # make data accessible
@@ -299,17 +315,22 @@ def update_email_interaction(google_email: GoogleEmail) -> Interaction:
     emails_raw = set(google_email_adapter.get_to_emails()) | {
         google_email_adapter.get_from_email()
     }
-    email_addresses = [get_or_create_contact_email(email, user) for email in emails_raw]
+    email_addresses = [
+        get_or_create_contact_email(email, user)
+        for email in emails_raw
+        if email not in ignore_emails
+    ]
     interaction.contacts.set({ea.contact for ea in email_addresses})
 
     return interaction
 
 
 def update_calendar_interaction(
-    event: GoogleCalendarEvent,
+    event: GoogleCalendarEvent, ignore_emails=()
 ) -> typing.Optional[Interaction]:
     """
     Takes a google calendar event and creates/updates/deletes the corresponding interaction.
+    :param ignore_emails: ignored emails
     :param event: calendar event
     """
     user = event.social_account.user
@@ -330,9 +351,18 @@ def update_calendar_interaction(
             interaction = Interaction()
 
         # update interaction
+        event_end = event_adapter.get_end()
+        event_end_datetime = (
+            # if datetime, use datetime
+            event_end
+            if isinstance(event_end, datetime)
+            # make latest possible datetime, if date
+            else datetime.combine(event_end, datetime.max.time())
+        )
+
         interaction.title = event_adapter.get_summary()
         interaction.description = "Google Calendar Event"
-        interaction.was_at = event_adapter.get_end().astimezone()
+        interaction.was_at = event_end_datetime.astimezone()
         interaction.type_id = None
         interaction.user = user
         interaction.save()
@@ -344,7 +374,9 @@ def update_calendar_interaction(
         # connect all invitees
         emails_raw = {attendee["email"] for attendee in event_adapter.get_attendees()}
         email_addresses = [
-            get_or_create_contact_email(email, user) for email in emails_raw
+            get_or_create_contact_email(email, user)
+            for email in emails_raw
+            if email not in ignore_emails
         ]
         interaction.contacts.set({ea.contact for ea in email_addresses})
 

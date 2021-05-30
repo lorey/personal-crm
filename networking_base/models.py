@@ -200,7 +200,7 @@ def get_due_contacts(user) -> typing.List[Contact]:
     return list(contacts)
 
 
-def get_or_create_contact_email(email, user) -> EmailAddress:
+def get_or_create_contact_email(email: str, user) -> EmailAddress:
     """
     Get or create an email address object.
 
@@ -208,7 +208,7 @@ def get_or_create_contact_email(email, user) -> EmailAddress:
     :param user: owning user
     :return: existing or created email address
     """
-    email_clean = email.lower()
+    email_clean = clean_email(email)
     ea = EmailAddress.objects.filter(email=email_clean, contact__user=user).first()
     if not ea:
         # email does not exist
@@ -218,3 +218,12 @@ def get_or_create_contact_email(email, user) -> EmailAddress:
         )
         ea = EmailAddress.objects.create(email=email_clean, contact=contact)
     return ea
+
+
+def clean_email(email: str):
+    """
+    Clean an email address.
+    :param email: input
+    :return: cleaned email
+    """
+    return email.lower()
