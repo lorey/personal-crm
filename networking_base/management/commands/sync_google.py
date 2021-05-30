@@ -160,125 +160,120 @@ class Command(BaseCommand):
         # fetch calendar and gmail for all users
         for user in User.objects.all():
             self.stdout.write(f"syncing {user}")
-            social_account = SocialAccount.objects.get(user=user)
-
-            self.stdout.write("- syncing calendar")
-            sync_calendar(social_account)
-
-            self.stdout.write("- syncing gmail")
-            sync_gmail(social_account)
-
-            # create interactions for all emails
-            self.stdout.write(f"- creating interactions for {user}")
-            google_emails = GoogleEmail.objects.filter(
-                social_account=social_account
-            ).all()
-            for google_email in google_emails:
-                try:
-                    update_email_interaction(google_email)
-                except HeaderParsingException:
-                    logging.exception("parsing email failed")
-
-            # create interactions for all calendar events
-            google_events = GoogleCalendarEvent.objects.filter(
-                social_account=social_account
-            ).all()
-            for google_event in google_events:
-                if not google_event.interaction:
-                    update_calendar_interaction(google_event)
+            gus = GoogleUserSync(user)
+            gus.sync()
 
 
-def sync_calendar(social_account):
-    social_token = SocialToken.objects.get(account=social_account)
-    social_app = SocialApp.objects.get(provider="google")
+class GoogleUserSync:
+    def __init__(self, user):
+        self.user = user
+        self.social_account = SocialAccount.objects.get(user=user, provider="google")
 
-    if not social_token.token_secret:
-        logging.warning(
-            f"refresh token (token secret) missing for {social_account.user}, needs to re-add app"
-        )
+    def sync(self):
+        self.sync_calendar()
+        self.sync_gmail()
+        self.update_interactions()
 
-    credentials = google.oauth2.credentials.Credentials(
-        social_token.token,
-        refresh_token=social_token.token_secret,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=social_app.client_id,
-        client_secret=social_app.secret,
-    )
-    service = build("calendar", "v3", credentials=credentials)
+    def update_interactions(self):
+        google_emails = GoogleEmail.objects.filter(
+            social_account=self.social_account
+        ).all()
+        for google_email in google_emails:
+            try:
+                update_email_interaction(google_email)
+            except HeaderParsingException:
+                logging.exception("parsing email failed")
 
-    request = service.events().list(calendarId="primary", maxResults=2500)
-    while request:
-        response = request.execute()
-        for item in response["items"]:
-            gcal_event, was_created = GoogleCalendarEvent.objects.get_or_create(
-                google_calendar_id=item["id"],
-                defaults={"data": item, "social_account": social_account},
+        # create interactions for all calendar events
+        google_events = GoogleCalendarEvent.objects.filter(
+            social_account=self.social_account
+        ).all()
+        for google_event in google_events:
+            if not google_event.interaction:
+                update_calendar_interaction(google_event)
+
+    def sync_calendar(self):
+        social_token = SocialToken.objects.get(account=self.social_account)
+        credentials = self._make_credentials(social_token)
+        service = build("calendar", "v3", credentials=credentials)
+
+        request = service.events().list(calendarId="primary", maxResults=2500)
+        while request:
+            response = request.execute()
+            for item in response["items"]:
+                gcal_event, was_created = GoogleCalendarEvent.objects.get_or_create(
+                    google_calendar_id=item["id"],
+                    defaults={"data": item, "social_account": self.social_account},
+                )
+                if not was_created:
+                    # calendar events can change, so needs to be updated
+                    gcal_event.data = item
+                    gcal_event.save()
+
+            # define next request
+            request = service.events().list_next(
+                previous_request=request, previous_response=response
             )
-            if not was_created:
-                # calendar events can change, so needs to be updated
-                gcal_event.data = item
-                gcal_event.save()
 
-        # define next request
-        request = service.events().list_next(
-            previous_request=request, previous_response=response
+    def _make_credentials(self, social_token: SocialToken):
+        social_app = SocialApp.objects.get(provider="google")
+        if not social_token.token_secret:
+            logging.warning(
+                f"refresh token (token secret) missing for {self.social_account.user}, needs to re-add app"
+            )
+        credentials = google.oauth2.credentials.Credentials(
+            social_token.token,
+            refresh_token=social_token.token_secret,
+            token_uri="https://oauth2.googleapis.com/token",
+            client_id=social_app.client_id,
+            client_secret=social_app.secret,
         )
+        return credentials
+
+    def sync_gmail(self):
+        social_token = SocialToken.objects.get(account=self.social_account)
+        credentials = self._make_credentials(social_token)
+        service = build("gmail", "v1", credentials=credentials)
+
+        request = service.users().messages().list(userId="me", maxResults=5000)
+        while request:
+            token_old = credentials.token
+            response = request.execute()
+            token_new = credentials.token
+
+            # update social token
+            if token_old != token_new:
+                social_token.token = credentials.token
+                social_token.expires_at = pytz.utc.localize(credentials.expiry)
+                social_token.save()
+                logging.warning("credentials changed: updated")
+
+            for result in response["messages"]:
+                if (
+                    GoogleEmail.objects.filter(gmail_message_id=result["id"]).count()
+                    == 0
+                ):
+                    msg = (
+                        service.users()
+                        .messages()
+                        .get(userId="me", id=result["id"], format="metadata")
+                        .execute()
+                    )
+
+                    GoogleEmail.objects.get_or_create(
+                        gmail_message_id=msg["id"],
+                        defaults={"data": msg, "social_account": self.social_account},
+                    )
+
+            # define next request
+            request = (
+                service.users()
+                .messages()
+                .list_next(previous_request=request, previous_response=response)
+            )
 
 
-def sync_gmail(social_account):
-    social_token = SocialToken.objects.get(account=social_account)
-    social_app = SocialApp.objects.get(provider="google")
-
-    if not social_token.token_secret:
-        logging.warning(
-            f"refresh token (token secret) missing for {social_account.user}, needs to re-add app"
-        )
-
-    credentials = google.oauth2.credentials.Credentials(
-        social_token.token,
-        refresh_token=social_token.token_secret,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=social_app.client_id,
-        client_secret=social_app.secret,
-    )
-    service = build("gmail", "v1", credentials=credentials)
-
-    request = service.users().messages().list(userId="me", maxResults=5000)
-    while request:
-        token_old = credentials.token
-        response = request.execute()
-        token_new = credentials.token
-
-        # update social token
-        if token_old != token_new:
-            social_token.token = credentials.token
-            social_token.expires_at = pytz.utc.localize(credentials.expiry)
-            social_token.save()
-            logging.warning("credentials changed: updated")
-
-        for result in response["messages"]:
-            if GoogleEmail.objects.filter(gmail_message_id=result["id"]).count() == 0:
-                msg = (
-                    service.users()
-                    .messages()
-                    .get(userId="me", id=result["id"], format="metadata")
-                    .execute()
-                )
-
-                GoogleEmail.objects.get_or_create(
-                    gmail_message_id=msg["id"],
-                    defaults={"data": msg, "social_account": social_account},
-                )
-
-        # define next request
-        request = (
-            service.users()
-            .messages()
-            .list_next(previous_request=request, previous_response=response)
-        )
-
-
-def update_email_interaction(google_email: GoogleEmail):
+def update_email_interaction(google_email: GoogleEmail) -> Interaction:
     user = google_email.social_account.user
 
     # make data accessible
@@ -307,8 +302,12 @@ def update_email_interaction(google_email: GoogleEmail):
     email_addresses = [get_or_create_contact_email(email, user) for email in emails_raw]
     interaction.contacts.set({ea.contact for ea in email_addresses})
 
+    return interaction
 
-def update_calendar_interaction(event: GoogleCalendarEvent):
+
+def update_calendar_interaction(
+    event: GoogleCalendarEvent,
+) -> typing.Optional[Interaction]:
     """
     Takes a google calendar event and creates/updates/deletes the corresponding interaction.
     :param event: calendar event
@@ -348,8 +347,11 @@ def update_calendar_interaction(event: GoogleCalendarEvent):
             get_or_create_contact_email(email, user) for email in emails_raw
         ]
         interaction.contacts.set({ea.contact for ea in email_addresses})
+
+        return interaction
     else:
         # no interaction object desired:
         # delete the interaction if it still exists
         if event.interaction:
             event.interaction.delete()
+        return None
