@@ -16,6 +16,7 @@ from pytz import UTC
 
 from networking_base.models import (
     Contact,
+    ContactDuplicate,
     ContactStatus,
     Interaction,
     get_due_contacts,
@@ -77,6 +78,9 @@ class ContactDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["interactions"] = context["object"].interactions.order_by("-was_at")
+        context["duplicates"] = ContactDuplicate.objects.filter(
+            contact=context["object"]
+        ).order_by("-similarity")
         return context
 
 

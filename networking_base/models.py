@@ -60,6 +60,16 @@ class Contact(models.Model):
         return self.name
 
 
+class ContactDuplicate(models.Model):
+    """
+    A potential duplicate.
+    """
+
+    contact = models.ForeignKey(Contact, models.CASCADE, related_name="+")
+    other_contact = models.ForeignKey(Contact, models.CASCADE, related_name="+")
+    similarity = models.FloatField()
+
+
 class EmailAddress(models.Model):
     """
     A contact's email address.
