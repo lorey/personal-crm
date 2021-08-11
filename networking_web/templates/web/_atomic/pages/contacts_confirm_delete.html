@@ -17,7 +17,7 @@
     <form method="post">
         {{ form|crispy }}
         {% csrf_token %}
-        <p class="my-5">
+        <p class="my-5 d-grid gap-2">
             <a class="btn btn-secondary" href="{% url 'networking_web:contact-view' contact.id %}">no, keep in touch</a>
             <button type="submit" class="btn btn-danger">yes, delete</button>
         </p>

@@ -20,6 +20,11 @@
             <a href="{% url 'networking_web:contact-overview' %}?status=-1" class="btn btn-secondary d-block">hidden ({{ hidden_count }})</a>
         </div>
     </div>
+
+    <a href="{% url 'networking_web:contact-create' %}" class="btn btn-primary d-block my-3" data-bs-placement="bottom" data-bs-toggle="tooltip" title="Create new contact...">
+        +
+    </a>
+
     {% if contact_list %}
         <div class="card p-3">
             {% include '../molecules/contact-table.html' with contacts=contact_list %}
@@ -34,7 +39,4 @@
 {% endblock %}
 
 {% block content-sidebar %}
-    <a href="{% url 'networking_web:contact-create' %}" class="btn btn-primary d-block">
-        add contact
-    </a>
 {% endblock %}

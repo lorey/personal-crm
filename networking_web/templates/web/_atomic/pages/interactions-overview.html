@@ -7,9 +7,7 @@
 
 {% block content-main %}
     {% if interaction_list or request.user.contacts %}
-        <a href="{% url 'networking_web:interaction-create' %}" class="btn btn-primary d-block mb-3">
-            +
-        </a>
+        {% include '../molecules/interaction-add-button.html' %}
 
         {% include '../organisms/interaction-list.html' with interactions=interaction_list|slice:10 %}
     {% else %}

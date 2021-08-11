@@ -21,7 +21,7 @@
     <form method="post">
         {{ form|crispy }}
         {% csrf_token %}
-        <p class="mt-3">
+        <p class="mt-3 d-grid gap-2">
             <button type="submit" class="btn btn-primary">save</button>
         </p>
     </form>
