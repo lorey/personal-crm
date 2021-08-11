@@ -6,6 +6,7 @@ from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Count
+from django.urls import reverse
 
 LAST_INTERACTION_DEFAULT = datetime.now().astimezone() - timedelta(days=365)
 
@@ -55,6 +56,9 @@ class Contact(models.Model):
         if self.get_urgency() > 0:
             return ContactStatus.OUT_OF_TOUCH
         return ContactStatus.IN_TOUCH
+
+    def get_absolute_url(self):
+        return reverse("networking_web:contact-view", kwargs={"pk": self.id})
 
     def __str__(self):
         return self.name

@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -23,6 +24,7 @@ from networking_base.models import (
     get_frequent_contacts,
     get_recent_contacts,
 )
+from networking_web.forms import InteractionForm
 
 CONTACT_FIELDS_DEFAULT = [
     "name",
@@ -30,11 +32,10 @@ CONTACT_FIELDS_DEFAULT = [
     "description",
     "linkedin_url",
     "twitter_url",
-    "phone_number",
 ]
 
 
-class ContactListView(ListView):
+class ContactListView(LoginRequiredMixin, ListView):
     model = Contact
     template_name = "web/_atomic/pages/contacts-overview.html"
     ordering = "name"
@@ -71,7 +72,7 @@ class ContactListView(ListView):
         return context
 
 
-class ContactDetailView(DetailView):
+class ContactDetailView(LoginRequiredMixin, DetailView):
     model = Contact
     template_name = "web/_atomic/pages/contacts-detail.html"
 
@@ -84,7 +85,7 @@ class ContactDetailView(DetailView):
         return context
 
 
-class ContactUpdateView(UpdateView):
+class ContactUpdateView(LoginRequiredMixin, UpdateView):
     model = Contact
     fields = CONTACT_FIELDS_DEFAULT
     template_name = "web/_atomic/pages/contacts_form.html"
@@ -93,7 +94,7 @@ class ContactUpdateView(UpdateView):
         return reverse("networking_web:contact-view", kwargs={"pk": self.object.id})
 
 
-class ContactCreateView(CreateView):
+class ContactCreateView(LoginRequiredMixin, CreateView):
     model = Contact
     fields = CONTACT_FIELDS_DEFAULT
     template_name = "web/_atomic/pages/contacts_form.html"
@@ -108,7 +109,7 @@ class ContactCreateView(CreateView):
         return reverse("networking_web:contact-view", kwargs={"pk": self.object.id})
 
 
-class ContactDeleteView(DeleteView):
+class ContactDeleteView(LoginRequiredMixin, DeleteView):
     model = Contact
     template_name = "web/_atomic/pages/contacts_confirm_delete.html"
 
@@ -117,14 +118,37 @@ class ContactDeleteView(DeleteView):
         return success_url
 
 
-class InteractionListView(ListView):
+class InteractionListView(LoginRequiredMixin, ListView):
     model = Interaction
     template_name = "web/_atomic/pages/interactions-overview.html"
-    ordering = "-was_at"
 
     def get_queryset(self):
         # return past interactions only as future ones don't match the view
-        return Interaction.objects.filter(was_at__lt=datetime.now().astimezone())
+        return Interaction.objects.filter(
+            was_at__lt=datetime.now().astimezone()
+        ).order_by("-was_at")
+
+
+class InteractionCreateView(LoginRequiredMixin, CreateView):
+    model = Interaction
+    form_class = InteractionForm
+    template_name = "web/_atomic/pages/interactions-form.html"
+
+    def get_success_url(self):
+        return reverse("networking_web:interactions-overview")
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+
+        # set the user id via the request
+        self.object.user_id = self.request.user.id
+
+        self.object.save()
+
+        # unclear why this is necessary (many-to-many needs save first?)
+        self.object.contacts.set(form.cleaned_data["contacts"])
+
+        return HttpResponseRedirect(self.get_success_url())
 
 
 @login_required

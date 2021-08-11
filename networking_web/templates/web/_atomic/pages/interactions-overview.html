@@ -6,9 +6,12 @@
 {% endblock %}
 
 {% block content-main %}
+    <a href="{% url 'networking_web:interaction-create' %}" class="btn btn-primary d-block mb-3">
+        +
+    </a>
+
     {% include '../organisms/interaction-list.html' with interactions=interaction_list|slice:10 %}
 {% endblock %}
 
 {% block content-sidebar %}
-    <a href="#" class="btn btn-primary d-block">add interaction</a>
 {% endblock %}

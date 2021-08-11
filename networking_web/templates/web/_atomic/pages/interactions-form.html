@@ -1,0 +1,37 @@
+{% extends '../templates/sidebar.html' %}
+{% load crispy_forms_tags %}
+
+{% block content-title %}
+    {% if object %}
+        {{ object.name }}
+    {% else %}
+        Create interaction
+    {% endif %}
+{% endblock %}
+
+{% block content-description %}
+    {% if object %}
+        Edit interaction
+    {% else %}
+        Create a new interaction.
+    {% endif %}
+{% endblock %}
+
+{% block content-main %}
+    <form method="post">
+        {{ form|crispy }}
+        {% csrf_token %}
+        <p class="mt-3">
+            <button type="submit" class="btn btn-primary">save</button>
+        </p>
+    </form>
+    <script>
+    $(document).ready(function() {
+        $('.selectmultiple').select2();
+    });
+
+    $(function () {
+        $(".datetimeinput").datetimepicker({format: 'Y-m-d H:i'});
+    });
+    </script>
+{% endblock %}
