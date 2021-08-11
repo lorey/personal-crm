@@ -19,6 +19,7 @@ from networking_base.models import (
     Contact,
     ContactDuplicate,
     ContactStatus,
+    EmailAddress,
     Interaction,
     get_due_contacts,
     get_frequent_contacts,
@@ -70,7 +71,7 @@ class ContactListView(LoginRequiredMixin, ListView):
             )
         else:
             # only show selected
-            context['contact_list'] = [c for c in contacts if c.frequency_in_days]
+            context["contact_list"] = [c for c in contacts if c.frequency_in_days]
 
         return context
 
@@ -119,6 +120,36 @@ class ContactDeleteView(LoginRequiredMixin, DeleteView):
     def get_success_url(self):
         success_url = reverse("networking_web:index")
         return success_url
+
+
+class EmailDeleteView(LoginRequiredMixin, DeleteView):
+    model = EmailAddress
+    template_name = "web/_atomic/pages/email-confirm-delete.html"
+
+    def get_queryset(self):
+        return EmailAddress.objects.filter(contact__user=self.request.user)
+
+    def get_success_url(self):
+        return reverse(
+            "networking_web:contact-view", kwargs={"pk": self.object.contact_id}
+        )
+
+
+class EmailListView(LoginRequiredMixin, ListView):
+    model = EmailAddress
+    template_name = "web/_atomic/pages/contacts-emails-overview.html"
+
+    def get_queryset(self):
+        return EmailAddress.objects.filter(
+            contact_id=self.kwargs["pk"], contact__user=self.request.user
+        )
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["contact"] = Contact.objects.get(
+            id=self.kwargs["pk"], user=self.request.user
+        )
+        return context
 
 
 class InteractionListView(LoginRequiredMixin, ListView):

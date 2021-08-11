@@ -22,6 +22,11 @@ urlpatterns = [
     path("contacts/create", views.ContactCreateView.as_view(), name="contact-create"),
     path("contacts/<int:pk>", views.ContactDetailView.as_view(), name="contact-view"),
     path(
+        "contacts/<int:pk>/emails",
+        views.EmailListView.as_view(),
+        name="contact-emails-overview",
+    ),
+    path(
         "contacts/<int:pk>/edit",
         views.ContactUpdateView.as_view(),
         name="contact-update",
@@ -35,5 +40,11 @@ urlpatterns = [
         "contacts/<int:contact_id>/add-touchpoint",
         views.add_touchpoint,
         name="add-touchpoint",
+    ),
+    # email
+    path(
+        "emails/<int:pk>/delete",
+        views.EmailDeleteView.as_view(),
+        name="email-delete",
     ),
 ]

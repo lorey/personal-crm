@@ -25,9 +25,8 @@
     <ul>
         {% for email in contact.email_addresses.all %}
             <li>
-                <a href="mailto:{{ email.email }}">
-                    {{ email.email }}
-                </a>
+                <a href="mailto:{{ email.email }}">{{ email.email }}</a>
+                (<a href="{% url 'networking_web:email-delete' email.id %}">remove</a>)
             </li>
         {% endfor %}
     </ul>

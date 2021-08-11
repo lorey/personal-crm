@@ -1,0 +1,25 @@
+{% extends '../templates/sidebar.html' %}
+{% load crispy_forms_tags %}
+
+{% block content-title %}
+    Remove an email <small>{{ object.email }}</small>
+{% endblock %}
+
+{% block content-main %}
+    <p>
+        Do you really want to remove {{ object.email }} from {{ object.contact.name }}?
+    </p>
+    <p>
+        Please note:
+        If the email exists in one of your connected accounts (Gmail, Calendar),
+        a new contact will be created for this email.
+    </p>
+    <form method="post">
+        {{ form|crispy }}
+        {% csrf_token %}
+        <p class="my-5 d-grid gap-2">
+            <a class="btn btn-secondary" href="{% url 'networking_web:contact-view' object.contact_id %}">no, keep it</a>
+            <button type="submit" class="btn btn-danger">yes, delete it</button>
+        </p>
+    </form>
+{% endblock %}
