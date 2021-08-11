@@ -8,7 +8,7 @@
 {% block content-main %}
     <div class="mb-3 row">
         <div class="col-md-3">
-            <a href="{% url 'networking_web:contact-overview' %}" class="btn btn-secondary d-block">all contacts ({{ all_count }})</a>
+            <a href="{% url 'networking_web:contact-overview' %}" class="btn btn-secondary d-block">selected ({{ selected_count }})</a>
         </div>
         <div class="col-md-3">
             <a href="{% url 'networking_web:contact-overview' %}?status=2" class="btn btn-secondary d-block">out of touch ({{ out_of_touch_count }})</a>
@@ -20,9 +20,17 @@
             <a href="{% url 'networking_web:contact-overview' %}?status=-1" class="btn btn-secondary d-block">hidden ({{ hidden_count }})</a>
         </div>
     </div>
-    <div class="card p-3">
-        {% include '../molecules/contact-table.html' with contacts=contact_list %}
-    </div>
+    {% if contact_list %}
+        <div class="card p-3">
+            {% include '../molecules/contact-table.html' with contacts=contact_list %}
+        </div>
+    {% else %}
+        <div class="alert alert-primary">
+            <strong>No matching contacts</strong><br>
+            Start by importing via integrations or creating a contact manually.
+            After that, select a frequency for some contacts.
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block content-sidebar %}

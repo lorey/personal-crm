@@ -50,7 +50,7 @@ class ContactListView(LoginRequiredMixin, ListView):
 
         # add counts
         contact_counts = {
-            "all": len(contacts),
+            "selected": len([c for c in contacts if c.frequency_in_days]),
             "out_of_touch": len(contacts_by_status.get(ContactStatus.OUT_OF_TOUCH, [])),
             "in_touch": len(contacts_by_status.get(ContactStatus.IN_TOUCH, [])),
             "hidden": len(contacts_by_status.get(ContactStatus.HIDDEN, [])),
@@ -68,6 +68,9 @@ class ContactListView(LoginRequiredMixin, ListView):
             context["contact_list"] = list(
                 filter(lambda c: c.get_status() == status, contacts)
             )
+        else:
+            # only show selected
+            context['contact_list'] = [c for c in contacts if c.frequency_in_days]
 
         return context
 
@@ -123,9 +126,13 @@ class InteractionListView(LoginRequiredMixin, ListView):
     template_name = "web/_atomic/pages/interactions-overview.html"
 
     def get_queryset(self):
-        # return past interactions only as future ones don't match the view
         return Interaction.objects.filter(
-            was_at__lt=datetime.now().astimezone()
+            # owned by user
+            user=self.request.user,
+            # past interactions only
+            was_at__lt=datetime.now().astimezone(),
+            # of contacts that are selected
+            contacts__frequency_in_days__isnull=False,
         ).order_by("-was_at")
 
 

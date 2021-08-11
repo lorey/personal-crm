@@ -10,7 +10,7 @@ from django.urls import reverse
 
 LAST_INTERACTION_DEFAULT = datetime.now().astimezone() - timedelta(days=365)
 
-CONTACT_FREQUENCY_DEFAULT = 365
+CONTACT_FREQUENCY_DEFAULT = None
 
 
 class ContactStatus(Enum):
@@ -25,7 +25,7 @@ class Contact(models.Model):
     """
 
     name = models.CharField(max_length=50)
-    frequency_in_days = models.IntegerField()
+    frequency_in_days = models.IntegerField(null=True, blank=True)
     user = models.ForeignKey(User, models.CASCADE)
 
     # contact details
@@ -33,26 +33,39 @@ class Contact(models.Model):
     linkedin_url = models.URLField(max_length=100, null=True, blank=True)
     twitter_url = models.URLField(max_length=100, null=True, blank=True)
 
-    def get_last_interaction(self):
+    def get_last_interaction(self) -> "Interaction":
         return self.interactions.order_by("-was_at").first()
 
-    def get_last_interaction_date_or_default(self):
+    def get_last_interaction_date_or_default(self) -> datetime:
         li = self.get_last_interaction()
         lid = LAST_INTERACTION_DEFAULT
         if li:
             lid = li.was_at
         return lid
 
-    def get_urgency(self):
+    def get_urgency(self) -> int:
+        """
+        Gets integer-based urgency to contact. Higher is more urgent.
+        :return:
+        """
+        if not self.frequency_in_days:
+            return 0
+
         last_interaction_date = self.get_last_interaction_date_or_default()
         time_since_interaction = datetime.now().astimezone() - last_interaction_date
         return time_since_interaction.days - self.frequency_in_days
 
-    def get_due_date(self):
+    def get_due_date(self) -> typing.Optional[datetime]:
+        if not self.frequency_in_days:
+            return None
+
         last_interaction_date = self.get_last_interaction_date_or_default()
         return last_interaction_date + timedelta(days=self.frequency_in_days)
 
     def get_status(self):
+        if not self.frequency_in_days:
+            return ContactStatus.HIDDEN
+
         if self.get_urgency() > 0:
             return ContactStatus.OUT_OF_TOUCH
         return ContactStatus.IN_TOUCH

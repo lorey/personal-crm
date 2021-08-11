@@ -6,11 +6,18 @@
 {% endblock %}
 
 {% block content-main %}
-    <a href="{% url 'networking_web:interaction-create' %}" class="btn btn-primary d-block mb-3">
-        +
-    </a>
+    {% if interaction_list or request.user.contacts %}
+        <a href="{% url 'networking_web:interaction-create' %}" class="btn btn-primary d-block mb-3">
+            +
+        </a>
 
-    {% include '../organisms/interaction-list.html' with interactions=interaction_list|slice:10 %}
+        {% include '../organisms/interaction-list.html' with interactions=interaction_list|slice:10 %}
+    {% else %}
+        <div class="alert alert-primary">
+            <strong>To create interactions, you need contacts</strong><br>
+            Please create <a href="{% url 'networking_web:contact-overview' %}">create contacts</a> first.
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block content-sidebar %}
