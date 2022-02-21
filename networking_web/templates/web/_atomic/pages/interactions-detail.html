@@ -1,0 +1,14 @@
+{% extends '../templates/sidebar.html' %}
+
+{% block content-title %}{{ interaction.title }}{% endblock %}
+{% block content-description %}
+    {{ interaction.was_at|date }} -- {{ interaction.was_at|timesince }} ago
+{% endblock %}
+
+{% block content-main %}
+    {% include '../molecules/interaction-card.html' with interaction=interaction %}
+    {% include '../molecules/interaction-edit-button.html' with interaction=interaction %}
+{% endblock %}
+
+{% block content-sidebar %}
+{% endblock %}

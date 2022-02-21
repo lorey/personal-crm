@@ -36,6 +36,13 @@ CONTACT_FIELDS_DEFAULT = [
 ]
 
 
+INTERACTION_FIELDS_DEFAULT = [
+    "title",
+    "description",
+    "was_at",
+]
+
+
 class ContactListView(LoginRequiredMixin, ListView):
     model = Contact
     template_name = "web/_atomic/pages/contacts-overview.html"
@@ -187,6 +194,20 @@ class InteractionCreateView(LoginRequiredMixin, CreateView):
         self.object.contacts.set(form.cleaned_data["contacts"])
 
         return HttpResponseRedirect(self.get_success_url())
+
+
+class InteractionDetailView(LoginRequiredMixin, DetailView):
+    model = Interaction
+    template_name = "web/_atomic/pages/interactions-detail.html"
+
+
+class InteractionUpdateView(LoginRequiredMixin, UpdateView):
+    model = Interaction
+    fields = INTERACTION_FIELDS_DEFAULT
+    template_name = "web/_atomic/pages/interactions-form.html"
+
+    def get_success_url(self):
+        return reverse("networking_web:interactions-overview")
 
 
 @login_required

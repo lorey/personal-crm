@@ -21,7 +21,10 @@
                 Interaction
             </div>
             <div>
-                {{ interaction.title }}
+                <a href="{% url 'networking_web:interaction-view' interaction.id %}"
+                   class="text-decoration-none">
+                        {{ interaction.title }}
+                </a><br>
             </div>
         </div>
         <div class="col-md-4 mt-1">
