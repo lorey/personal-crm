@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",  # required by allauth
     # addons
     "crispy_forms",
+    "markdownify",
     # apps
     # has to be included before allauth to make templates work
     # otherwise base.html is set by allauth(?)

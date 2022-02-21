@@ -8,6 +8,7 @@ pylint
 # app
 django
 django-allauth
+django-markdownify
 pandas
 django-crispy-forms
 

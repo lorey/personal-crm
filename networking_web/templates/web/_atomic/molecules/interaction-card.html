@@ -1,3 +1,4 @@
+{% load markdownify %}
 <div class="card card-body mb-3">
     <div class="row">
         <div class="col-md-4 mt-1">
@@ -43,7 +44,7 @@
                 Description
             </div>
             <div>
-                {{ interaction.description }}
+                {{ interaction.description|markdownify }}
             </div>
         </div>
     {% endif %}
