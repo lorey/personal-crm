@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",  # required by allauth
     # addons
     "crispy_forms",
+    "markdownify",
     # apps
     # has to be included before allauth to make templates work
     # otherwise base.html is set by allauth(?)
@@ -158,4 +159,66 @@ SOCIALACCOUNT_PROVIDERS = {
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_FORMS = {
     "add_email": "networking_base.forms.AddEmailFormRespectingVerification"
+}
+
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": [
+            "a",
+            "abbr",
+            "acronym",
+            "b",
+            "blockquote",
+            "br",
+            "code",
+            "div",
+            "em",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "i",
+            "img",
+            "li",
+            "ol",
+            "p",
+            "strong",
+            "table",
+            "tbody",
+            "td",
+            "th",
+            "thead",
+            "tr",
+            "ul",
+        ],
+        "MARKDOWN_EXTENSIONS": [
+            "markdown.extensions.extra",
+            "markdown.extensions.abbr",
+            "markdown.extensions.attr_list",
+            "markdown.extensions.def_list",
+            "markdown.extensions.fenced_code",
+            "markdown.extensions.footnotes",
+            "markdown.extensions.md_in_html",
+            "markdown.extensions.tables",
+            "markdown.extensions.admonition",
+            "markdown.extensions.codehilite",
+            "markdown.extensions.legacy_attrs",
+            "markdown.extensions.legacy_em",
+            "markdown.extensions.meta",
+            "markdown.extensions.nl2br",
+            "markdown.extensions.sane_lists",
+            "markdown.extensions.smarty",
+            "markdown.extensions.toc",
+            "markdown.extensions.wikilinks",
+        ],
+        "WHITELIST_ATTRS": [
+            "align",
+            "alt",
+            "href",
+            "role",
+            "src",
+        ],
+    }
 }

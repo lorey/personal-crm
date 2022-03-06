@@ -1,8 +1,9 @@
 {% extends '../templates/sidebar.html' %}
+{% load markdownify %}
 
 {% block content-title %}{{ contact.name }}{% endblock %}
 {% block content-description %}
-    {{ contact.description|default:'no description' }}
+    {{ contact.description|default:'no description'|markdownify }}
 {% endblock %}
 
 {% block content-main %}
